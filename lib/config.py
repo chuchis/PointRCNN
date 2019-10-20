@@ -106,7 +106,7 @@ __C.RCNN.SIZE_RES_ON_ROI = False
 __C.RCNN.USE_BN = False
 __C.RCNN.DP_RATIO = 0.0
 
-__C.RCNN.BACKBONE = 'pointnet'  # pointnet, pointsift
+__C.RCNN.BACKBONE = 'pointnet'  # pointnet, pointsift, edgeconv, rotnet
 __C.RCNN.XYZ_UP_LAYER = [128, 128]
 
 __C.RCNN.NUM_POINTS = 512
@@ -117,6 +117,16 @@ __C.RCNN.SA_CONFIG.NSAMPLE = [64, 64, 64]
 __C.RCNN.SA_CONFIG.MLPS = [[128, 128, 128],
                            [128, 128, 256],
                            [256, 256, 512]]
+__C.RCNN.GCN_CONFIG = edict()
+__C.RCNN.GCN_CONFIG.FILTERS = [64, 64, 128, 128, 256]
+__C.RCNN.ROT_CONFIG = edict()
+__C.RCNN.ROT_CONFIG.DEGREE_RES = 5
+__C.RCNN.ROT_CONFIG.DROPOUT = .5
+__C.RCNN.ROT_CONFIG.NFILTERS = [64, 128, 256, 512]
+__C.RCNN.ROT_CONFIG.KERNEL_SIZE = [5, 5, 3, 3]
+__C.RCNN.ROT_CONFIG.STRIDE = [2, 2, 2, 2]
+__C.RCNN.ROT_CONFIG.PIXEL_SIZE = 0.0625
+__C.RCNN.ROT_CONFIG.IM_SIZE_M = [4, 4]
 __C.RCNN.CLS_FC = [256, 256]
 __C.RCNN.REG_FC = [256, 256]
 

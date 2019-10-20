@@ -94,7 +94,7 @@ RCNN:
     USE_BN: False
     DP_RATIO: 0.0
 
-    BACKBONE: pointnet  # pointnet
+    BACKBONE: rotnet  # pointnet, edgeconv, rotnet
     XYZ_UP_LAYER: [128, 128]
 
     NUM_POINTS: 512
@@ -105,6 +105,10 @@ RCNN:
         MLPS: [[128, 128, 128],
                [128, 128, 256],
                [256, 256, 512]]
+
+    GCN_CONFIG:
+        FILTERS: [64, 64, 96, 96, 128]
+
     CLS_FC: [256, 256]
     REG_FC: [256, 256]
 
