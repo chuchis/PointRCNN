@@ -8,7 +8,7 @@ import lib.utils.loss_utils as loss_utils
 from lib.config import cfg
 import numpy as np
 # from PIL import Image
-import png
+# import png
 
 import lib.utils.kitti_utils as kitti_utils
 import lib.utils.roipool3d.roipool3d_utils as roipool3d_utils
