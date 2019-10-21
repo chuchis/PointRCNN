@@ -43,6 +43,7 @@ class DenseDeepGCN(torch.nn.Module):
         else:
             raise NotImplementedError('{} is not implemented. Please check.\n'.format(opt.block))
         self.fusion_block = BasicConv([channels+c_growth*(self.n_blocks-1), 1024], act, norm, bias)
+        self.channel_out = 1024+channels+c_growth*(self.n_blocks-1)
 
         self.model_init()
 
@@ -68,15 +69,15 @@ class DenseDeepGCN(torch.nn.Module):
 
 class DenseOpts():
     def __init__(self):
-        self.n_filters = 64
-        self.kernel_size = 16
+        self.n_filters = cfg.RCNN.DEEPGCN_CONFIG.N_FILTERS
+        self.kernel_size = cfg.RCNN.DEEPGCN_CONFIG.KERNEL_SIZE
         self.act = 'relu'
         self.norm = 'batch'
         self.bias = True
         self.epsilon = 0.2
         self.stochastic = True
-        self.conv = 'mr' # edge, mr
-        self.n_blocks = 20
+        self.conv = cfg.RCNN.DEEPGCN_CONFIG.CONV # edge, mr
+        self.n_blocks = cfg.RCNN.DEEPGCN_CONFIG.N_BLOCKS
         self.in_channels = 3
         self.block = 'res'
 
@@ -89,7 +90,7 @@ class DenseRCNN(nn.Module):
         # classification layer
         cls_channel = 1 if num_classes == 2 else num_classes
         cls_layers = []
-        channel_in = 2304
+        channel_in = backbone.channel_out
         pre_channel = channel_in
         for k in range(0, cfg.RCNN.CLS_FC.__len__()):
             cls_layers.append(pt_utils.Conv1d(pre_channel, cfg.RCNN.CLS_FC[k], bn=cfg.RCNN.USE_BN))
