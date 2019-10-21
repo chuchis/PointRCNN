@@ -12,6 +12,217 @@ import png
 
 import lib.utils.kitti_utils as kitti_utils
 import lib.utils.roipool3d.roipool3d_utils as roipool3d_utils
+from gcn_lib.dense import BasicConv, GraphConv2d, ResDynBlock2d, DenseDynBlock2d, DenseDilatedKnnGraph
+from torch.nn import Sequential as Seq
+
+
+class DenseDeepGCN(torch.nn.Module):
+    def __init__(self, opt):
+        super(DenseDeepGCN, self).__init__()
+        channels = opt.n_filters
+        k = opt.kernel_size
+        act = opt.act
+        norm = opt.norm
+        bias = opt.bias
+        epsilon = opt.epsilon
+        stochastic = opt.stochastic
+        conv = opt.conv
+        c_growth = channels
+        self.n_blocks = opt.n_blocks
+
+        self.knn = DenseDilatedKnnGraph(k, 1, stochastic, epsilon)
+        self.head = GraphConv2d(opt.in_channels, channels, conv, act, norm, bias)
+
+        if opt.block.lower() == 'res':
+            self.backbone = Seq(*[ResDynBlock2d(channels, k, 1+i, conv, act, norm, bias, stochastic, epsilon)
+                                  for i in range(self.n_blocks-1)])
+        elif opt.block.lower() == 'dense':
+            self.backbone = Seq(*[DenseDynBlock2d(channels+c_growth*i, c_growth, k, 1+i, conv, act,
+                                                  norm, bias, stochastic, epsilon)
+                                  for i in range(self.n_blocks-1)])
+        else:
+            raise NotImplementedError('{} is not implemented. Please check.\n'.format(opt.block))
+        self.fusion_block = BasicConv([channels+c_growth*(self.n_blocks-1), 1024], act, norm, bias)
+
+        self.model_init()
+
+    def model_init(self):
+        for m in self.modules():
+            if isinstance(m, torch.nn.Conv2d):
+                torch.nn.init.kaiming_normal_(m.weight)
+                m.weight.requires_grad = True
+                if m.bias is not None:
+                    m.bias.data.zero_()
+                    m.bias.requires_grad = True
+
+    def forward(self, inputs):
+        #(B,C,N,1)
+        feats = [self.head(inputs, self.knn(inputs[:, 0:3]))]
+        for i in range(self.n_blocks-1):
+            feats.append(self.backbone[i](feats[-1]))
+        feats = torch.cat(feats, dim=1)
+
+        fusion = torch.max_pool2d(self.fusion_block(feats), kernel_size=[feats.shape[2], feats.shape[3]])
+        fusion = torch.repeat_interleave(fusion, repeats=feats.shape[2], dim=2)
+        return torch.cat((fusion, feats), dim=1)
+
+class DenseOpts():
+    def __init__(self):
+        self.n_filters = 64
+        self.kernel_size = 16
+        self.act = 'relu'
+        self.norm = 'batch'
+        self.bias = True
+        self.epsilon = 0.2
+        self.stochastic = True
+        self.conv = 'mr' # edge, mr
+        self.n_blocks = 20
+        self.in_channels = 3
+        self.block = 'res'
+
+class DenseRCNN(nn.Module):
+    def __init__(self, num_classes, input_channels=0, use_xyz=True):
+        super().__init__()
+        opt = DenseOpts()
+        self.backbone = DenseDeepGCN(opt)
+
+        # classification layer
+        cls_channel = 1 if num_classes == 2 else num_classes
+        cls_layers = []
+        channel_in = 2304
+        pre_channel = channel_in
+        for k in range(0, cfg.RCNN.CLS_FC.__len__()):
+            cls_layers.append(pt_utils.Conv1d(pre_channel, cfg.RCNN.CLS_FC[k], bn=cfg.RCNN.USE_BN))
+            pre_channel = cfg.RCNN.CLS_FC[k]
+        cls_layers.append(pt_utils.Conv1d(pre_channel, cls_channel, activation=None))
+        if cfg.RCNN.DP_RATIO >= 0:
+            cls_layers.insert(1, nn.Dropout(cfg.RCNN.DP_RATIO))
+        self.cls_layer = nn.Sequential(*cls_layers)
+
+        if cfg.RCNN.LOSS_CLS == 'SigmoidFocalLoss':
+            self.cls_loss_func = loss_utils.SigmoidFocalClassificationLoss(alpha=cfg.RCNN.FOCAL_ALPHA[0],
+                                                                           gamma=cfg.RCNN.FOCAL_GAMMA)
+        elif cfg.RCNN.LOSS_CLS == 'BinaryCrossEntropy':
+            self.cls_loss_func = F.binary_cross_entropy
+        elif cfg.RCNN.LOSS_CLS == 'CrossEntropy':
+            cls_weight = torch.from_numpy(cfg.RCNN.CLS_WEIGHT).float()
+            self.cls_loss_func = nn.CrossEntropyLoss(ignore_index=-1, reduce=False, weight=cls_weight)
+        else:
+            raise NotImplementedError
+
+        # regression layer
+        per_loc_bin_num = int(cfg.RCNN.LOC_SCOPE / cfg.RCNN.LOC_BIN_SIZE) * 2
+        loc_y_bin_num = int(cfg.RCNN.LOC_Y_SCOPE / cfg.RCNN.LOC_Y_BIN_SIZE) * 2
+        reg_channel = per_loc_bin_num * 4 + cfg.RCNN.NUM_HEAD_BIN * 2 + 3
+        reg_channel += (1 if not cfg.RCNN.LOC_Y_BY_BIN else loc_y_bin_num * 2)
+
+        reg_layers = []
+        pre_channel = channel_in
+        for k in range(0, cfg.RCNN.REG_FC.__len__()):
+            reg_layers.append(pt_utils.Conv1d(pre_channel, cfg.RCNN.REG_FC[k], bn=cfg.RCNN.USE_BN))
+            pre_channel = cfg.RCNN.REG_FC[k]
+        reg_layers.append(pt_utils.Conv1d(pre_channel, reg_channel, activation=None))
+        if cfg.RCNN.DP_RATIO >= 0:
+            reg_layers.insert(1, nn.Dropout(cfg.RCNN.DP_RATIO))
+        self.reg_layer = nn.Sequential(*reg_layers)
+
+        self.proposal_target_layer = ProposalTargetLayer()
+        self.init_weights(weight_init='xavier')
+
+    def init_weights(self, weight_init='xavier'):
+        if weight_init == 'kaiming':
+            init_func = nn.init.kaiming_normal_
+        elif weight_init == 'xavier':
+            init_func = nn.init.xavier_normal_
+        elif weight_init == 'normal':
+            init_func = nn.init.normal_
+        else:
+            raise NotImplementedError
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d) or isinstance(m, nn.Conv1d):
+                if weight_init == 'normal':
+                    init_func(m.weight, mean=0, std=0.001)
+                else:
+                    init_func(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+        nn.init.normal_(self.reg_layer[-1].conv.weight, mean=0, std=0.001)
+
+    def _break_up_pc(self, pc):
+        xyz = pc[..., 0:3].contiguous()
+        features = (
+            pc[..., 3:].transpose(1, 2).contiguous()
+            if pc.size(-1) > 3 else None
+        )
+
+        return xyz, features
+
+    def forward(self, input_data):
+        """
+        :param input_data: input dict
+        :return:
+        """
+        if cfg.RCNN.ROI_SAMPLE_JIT:
+            if self.training:
+                with torch.no_grad():
+                    target_dict = self.proposal_target_layer(input_data)
+
+                pts_input = torch.cat((target_dict['sampled_pts'], target_dict['pts_feature']), dim=2)
+                target_dict['pts_input'] = pts_input
+            else:
+                rpn_xyz, rpn_features = input_data['rpn_xyz'], input_data['rpn_features']
+                batch_rois = input_data['roi_boxes3d']
+                if cfg.RCNN.USE_INTENSITY:
+                    pts_extra_input_list = [input_data['rpn_intensity'].unsqueeze(dim=2),
+                                            input_data['seg_mask'].unsqueeze(dim=2)]
+                else:
+                    pts_extra_input_list = [input_data['seg_mask'].unsqueeze(dim=2)]
+
+                if cfg.RCNN.USE_DEPTH:
+                    pts_depth = input_data['pts_depth'] / 70.0 - 0.5
+                    pts_extra_input_list.append(pts_depth.unsqueeze(dim=2))
+                pts_extra_input = torch.cat(pts_extra_input_list, dim=2)
+
+                pts_feature = torch.cat((pts_extra_input, rpn_features), dim=2)
+                pooled_features, pooled_empty_flag = \
+                        roipool3d_utils.roipool3d_gpu(rpn_xyz, pts_feature, batch_rois, cfg.RCNN.POOL_EXTRA_WIDTH,
+                                                      sampled_pt_num=cfg.RCNN.NUM_POINTS)
+
+                # canonical transformation
+                batch_size = batch_rois.shape[0]
+                roi_center = batch_rois[:, :, 0:3]
+                pooled_features[:, :, :, 0:3] -= roi_center.unsqueeze(dim=2)
+                for k in range(batch_size):
+                    pooled_features[k, :, :, 0:3] = kitti_utils.rotate_pc_along_y_torch(pooled_features[k, :, :, 0:3],
+                                                                                        batch_rois[k, :, 6])
+
+                pts_input = pooled_features.view(-1, pooled_features.shape[2], pooled_features.shape[3])
+        else:
+            pts_input = input_data['pts_input']
+            target_dict = {}
+            target_dict['pts_input'] = input_data['pts_input']
+            target_dict['roi_boxes3d'] = input_data['roi_boxes3d']
+            if self.training:
+                target_dict['cls_label'] = input_data['cls_label']
+                target_dict['reg_valid_mask'] = input_data['reg_valid_mask']
+                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct']
+
+        xyz, features = self._break_up_pc(pts_input)
+        # print(xyz)
+        # print(xyz.shape)
+        pt_features = self.backbone(xyz.transpose(1,2).contiguous().unsqueeze(3))
+        features = torch.max(pt_features, dim=2)[0]
+        # print(features.shape)
+
+        rcnn_cls = self.cls_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
+        rcnn_reg = self.reg_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
+        ret_dict = {'rcnn_cls': rcnn_cls, 'rcnn_reg': rcnn_reg}
+
+        if self.training:
+            ret_dict.update(target_dict)
+        return ret_dict
+
 
 
 def knn(x, k):
@@ -539,7 +750,7 @@ class RotRCNN(nn.Module):
             # print(l_features.shape)
 
         features = l_features[-1].view(l_features[-1].shape[0], -1).unsqueeze(2)
-
+        # print(features.shape)
         rcnn_cls = self.cls_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
         rcnn_reg = self.reg_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
         ret_dict = {'rcnn_cls': rcnn_cls, 'rcnn_reg': rcnn_reg}
@@ -719,9 +930,11 @@ class RCNNNet(nn.Module):
             li_xyz, li_features = self.SA_modules[i](l_xyz[i], l_features[i])
             l_xyz.append(li_xyz)
             l_features.append(li_features)
+        # print(l_features[-1].shape)
 
         rcnn_cls = self.cls_layer(l_features[-1]).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
         rcnn_reg = self.reg_layer(l_features[-1]).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
+        # print(rcnn_cls.shape)
         ret_dict = {'rcnn_cls': rcnn_cls, 'rcnn_reg': rcnn_reg}
 
         if self.training:

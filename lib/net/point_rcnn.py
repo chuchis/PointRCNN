@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from lib.net.rpn import RPN
-from lib.net.rcnn_net import RCNNNet, GCNNet, RotRCNN, get_num_rot
+from lib.net.rcnn_net import RCNNNet, GCNNet, RotRCNN, get_num_rot, DenseRCNN
 from lib.config import cfg
 
 
@@ -26,6 +26,9 @@ class PointRCNN(nn.Module):
             elif cfg.RCNN.BACKBONE == 'rotnet':
                 rcnn_input_channels = get_num_rot(cfg.RCNN.ROT_CONFIG.DEGREE_RES)
                 self.rcnn_net = RotRCNN(num_classes=num_classes, input_channels=rcnn_input_channels, use_xyz=use_xyz)
+            elif cfg.RCNN.BACKBONE == 'deepgcn':
+                rcnn_input_channels = 256
+                self.rcnn_net = DenseRCNN(num_classes=num_classes, input_channels=rcnn_input_channels, use_xyz=use_xyz)
             else:
                 raise NotImplementedError
 
