@@ -844,7 +844,7 @@ def repeat_eval_ckpt(root_result_dir, ckpt_dir):
 def create_dataloader(logger):
     mode = 'TEST' if args.test else 'EVAL'
     DATA_PATH = os.path.join('..', 'data')
-
+    DATA_PATH = '/ibex/scratch/zarzarj/'
     # create dataloader
     test_set = KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.TEST.SPLIT, mode=mode,
                                 random_select=args.random_select,

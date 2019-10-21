@@ -92,7 +92,9 @@ class GTDatabaseGenerator(KittiDataset):
 
 
 if __name__ == '__main__':
-    dataset = GTDatabaseGenerator(root_dir='../data/', split=args.split)
+    dataset_path = '../data/'
+    dataset_path = '/ibex/scratch/zarzarj/'
+    dataset = GTDatabaseGenerator(root_dir=dataset_path, split=args.split)
     os.makedirs(args.save_dir, exist_ok=True)
 
     dataset.generate_gt_database()
