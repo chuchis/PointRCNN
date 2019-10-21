@@ -7,7 +7,8 @@ import pointnet2_lib.pointnet2.pytorch_utils as pt_utils
 import lib.utils.loss_utils as loss_utils
 from lib.config import cfg
 import numpy as np
-from PIL import Image
+# from PIL import Image
+import png
 
 import lib.utils.kitti_utils as kitti_utils
 import lib.utils.roipool3d.roipool3d_utils as roipool3d_utils
@@ -329,11 +330,11 @@ class RotProjNet(nn.Module):
         xyz_rot = xyz.repeat_interleave(self.num_rot, dim=0).contiguous().transpose(1,2).contiguous()
         rot_mat = self.rot_mat.repeat(batch_size, 1, 1)
         xyz_rot = torch.bmm(rot_mat, xyz_rot)
-        xyz_rot = xyz_rot.view(batch_size, self.num_rot, 3, num_pts).contiguous() # (B, M, 3, N) with M different views
-        xyz_proj = xyz_rot[:,:,:2,:].transpose(2,3).contiguous() + torch.tensor([self.im_size_meters[0]/2, self.im_size_meters[0]/2]).cuda()  #(B, M, N, 2) with M different views
+        xyz_rot = xyz_rot.view(batch_size, self.num_rot, 3, num_pts).contiguous().transpose(2,3).contiguous() # (B, M, N, 3) with M different views
+        xyz_proj = xyz_rot[:,:,:,:2] + torch.tensor([self.im_size_meters[0]/2, self.im_size_meters[0]/2]).cuda()  #(B, M, N, 3) with M different views
         # print(xyz_proj.shape)
         xyz_proj = torch.round(xyz_proj/self.pixel_size).long()
-        xyz_proj[:,:,:,1] = xyz_proj[:,:,:,1]
+        # xyz_proj[:,:,:,1] = xyz_proj[:,:,:,1]
         # print(xyz_proj.shape)
         xyz_proj_mask = (xyz_proj[:,:,:,0] >= 0) & (xyz_proj[:,:,:,0] < self.im_size[0]) & (xyz_proj[:,:,:,1] >= 0) & (xyz_proj[:,:,:,1] < self.im_size[1])
         # print(xyz_proj_mask.shape)
@@ -353,10 +354,15 @@ class RotProjNet(nn.Module):
         #         for n in range(num_pts):
         #             image[b,m, xyz_proj[b,m,n,0], xyz_proj[b,m,n,1]] = 1 #occupied voxelization
         # print(B.shape)
-        image[B,M,xyz_proj[B,M,N,1], xyz_proj[B,M,N,0]] = 1 #occupied voxelization
-#         for i in range(self.num_rot):
-#             im = Image.fromarray(image[0,i].detach().cpu().numpy(), mode="1")
-#             im.save("views/image"+str(i)+".jpeg")
+        if cfg.RCNN.ROT_CONFIG.OCCUPANCY:
+            image[B,M,xyz_proj[B,M,N,1], xyz_proj[B,M,N,0]] = 1 # occupied voxelization
+        else:
+            image[B,M,xyz_proj[B,M,N,1], xyz_proj[B,M,N,0]] = xyz_rot[B,M,N,2]/10 # distance voxelization
+        # for i in range(self.num_rot):
+        #     f = open("views/image"+str(i)+".png", 'wb')      # binary mode is important
+        #     w = png.Writer(64, 64, greyscale=True)
+        #     w.write(f,image[0,i].detach().cpu().numpy().astype(np.uint8)*255)
+        #     f.close()
         # print(image)
         return image
 
@@ -526,16 +532,16 @@ class RotRCNN(nn.Module):
         xyz, features = self._break_up_pc(pts_input)
         # print(xyz)
 
-        l_features = self.rot_net(xyz)
+        l_features = [self.rot_net(xyz)]
         # print(l_features)
         for layer in self.ref_modules:
-            l_features = layer(l_features)
+            l_features.append(layer(l_features[-1]))
             # print(l_features.shape)
 
-        l_features = l_features.view(l_features.shape[0], -1).unsqueeze(2)
+        features = l_features[-1].view(l_features[-1].shape[0], -1).unsqueeze(2)
 
-        rcnn_cls = self.cls_layer(l_features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
-        rcnn_reg = self.reg_layer(l_features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
+        rcnn_cls = self.cls_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
+        rcnn_reg = self.reg_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
         ret_dict = {'rcnn_cls': rcnn_cls, 'rcnn_reg': rcnn_reg}
 
         if self.training:
