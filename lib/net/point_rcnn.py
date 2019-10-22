@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from lib.net.rpn import RPN
-from lib.net.rcnn_net import RCNNNet, GCNNet, RotRCNN, get_num_rot, DenseRCNN
+from lib.net.rcnn_net import RCNNNet, GCNNet, RotRCNN, get_num_rot, DenseRCNN, RefineRCNNNet
 from lib.config import cfg
 
 
@@ -29,6 +29,10 @@ class PointRCNN(nn.Module):
             elif cfg.RCNN.BACKBONE == 'deepgcn':
                 # rcnn_input_channels = 256
                 self.rcnn_net = DenseRCNN(num_classes=num_classes, input_channels=rcnn_input_channels, use_xyz=use_xyz)
+                
+            elif cfg.RCNN.BACKBONE == 'refine':
+                # rcnn_input_channels = 256
+                self.rcnn_net = RefineRCNNNet(num_classes=num_classes, input_channels=rcnn_input_channels, use_xyz=use_xyz)
             else:
                 raise NotImplementedError
 
