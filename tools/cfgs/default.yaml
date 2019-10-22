@@ -109,6 +109,22 @@ RCNN:
     GCN_CONFIG:
         FILTERS: [64, 64, 96, 96, 128]
 
+    DEEPGCN_CONFIG:
+        N_FILTERS: 64
+        KERNEL_SIZE: 16
+        N_BLOCKS: 20
+        CONV: 'mr'
+
+    ROT_CONFIG:
+        DEGREE_RES: 5
+        OCCUPANCY: False
+        DROPOUT: .5
+        NFILTERS: [128, 128, 256, 512]
+        KERNEL_SIZE: [5, 5, 3, 3]
+        STRIDE: [2, 2, 2, 2]
+        PIXEL_SIZE: 0.0625
+        IM_SIZE_M: [4, 4]
+
     CLS_FC: [256, 256]
     REG_FC: [256, 256]
 
