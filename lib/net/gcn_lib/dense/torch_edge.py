@@ -50,9 +50,14 @@ def dense_knn_matrix(x, k=16):
     Returns:
         nearest neighbors: (batch_size, num_points ,k) (batch_size, num_points, k)
     """
+    # print(x.shape)
     x = x.transpose(2, 1).squeeze(-1)
     batch_size, n_points, n_dims = x.shape
+    # print((-pairwise_distance(x.detach())).shape)
+    # print(k)
     _, nn_idx = torch.topk(-pairwise_distance(x.detach()), k=k)
+    # print(nn_idx.shape)
+
     center_idx = torch.arange(0, n_points).repeat(batch_size, k, 1).transpose(2, 1)
     center_idx = center_idx.to(x.device)
     return torch.stack((nn_idx, center_idx), dim=0)
@@ -73,6 +78,7 @@ class DenseDilatedKnnGraph(nn.Module):
 
     def forward(self, x):
         edge_index = self.knn(x, self.k * self.dilation)
+        # print(self.k, self.dilation)
         return self._dilated(edge_index)
 
 
