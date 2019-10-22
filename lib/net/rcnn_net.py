@@ -623,7 +623,7 @@ class RotRCNN(nn.Module):
         # classification layer
         cls_channel = 1 if num_classes == 2 else num_classes
         cls_layers = []
-        pre_channel = channel_in * 4
+        pre_channel = channel_in * cfg.RCNN.ROT_CONFIG.CONV_FEAT_MULTIPLIER
         for k in range(0, cfg.RCNN.CLS_FC.__len__()):
             cls_layers.append(pt_utils.Conv1d(pre_channel, cfg.RCNN.CLS_FC[k], bn=cfg.RCNN.USE_BN))
             pre_channel = cfg.RCNN.CLS_FC[k]
@@ -650,7 +650,7 @@ class RotRCNN(nn.Module):
         reg_channel += (1 if not cfg.RCNN.LOC_Y_BY_BIN else loc_y_bin_num * 2)
 
         reg_layers = []
-        pre_channel = channel_in * 4
+        pre_channel = channel_in * cfg.RCNN.ROT_CONFIG.CONV_FEAT_MULTIPLIER
         for k in range(0, cfg.RCNN.REG_FC.__len__()):
             reg_layers.append(pt_utils.Conv1d(pre_channel, cfg.RCNN.REG_FC[k], bn=cfg.RCNN.USE_BN))
             pre_channel = cfg.RCNN.REG_FC[k]

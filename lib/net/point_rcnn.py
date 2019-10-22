@@ -21,13 +21,13 @@ class PointRCNN(nn.Module):
             elif cfg.RCNN.BACKBONE == 'pointsift':
                 pass 
             elif cfg.RCNN.BACKBONE == 'edgeconv':
-                rcnn_input_channels = 256
+                rcnn_input_channels = cfg.RCNN.GCN_CONFIG.FILTERS[-1]*2
                 self.rcnn_net = GCNNet(num_classes=num_classes, input_channels=rcnn_input_channels, use_xyz=use_xyz)
             elif cfg.RCNN.BACKBONE == 'rotnet':
                 rcnn_input_channels = get_num_rot(cfg.RCNN.ROT_CONFIG.DEGREE_RES)
                 self.rcnn_net = RotRCNN(num_classes=num_classes, input_channels=rcnn_input_channels, use_xyz=use_xyz)
             elif cfg.RCNN.BACKBONE == 'deepgcn':
-                rcnn_input_channels = 256
+                # rcnn_input_channels = 256
                 self.rcnn_net = DenseRCNN(num_classes=num_classes, input_channels=rcnn_input_channels, use_xyz=use_xyz)
             else:
                 raise NotImplementedError

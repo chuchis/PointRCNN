@@ -124,6 +124,7 @@ RCNN:
         STRIDE: [2, 2, 2, 2]
         PIXEL_SIZE: 0.0625
         IM_SIZE_M: [4, 4]
+        CONV_FEAT_MULTIPLIER: 4
 
     CLS_FC: [256, 256]
     REG_FC: [256, 256]
