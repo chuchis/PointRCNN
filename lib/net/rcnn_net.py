@@ -993,6 +993,8 @@ class RefineRCNNNet(nn.Module):
         # classification layer
         cls_channel = 1 if num_classes == 2 else num_classes
         cls_layers = []
+        channel_in = self.backbone.channel_out
+
         pre_channel = channel_in
         for k in range(0, cfg.RCNN.CLS_FC.__len__()):
             cls_layers.append(pt_utils.Conv1d(pre_channel, cfg.RCNN.CLS_FC[k], bn=cfg.RCNN.USE_BN))
@@ -1133,10 +1135,10 @@ class RefineRCNNNet(nn.Module):
         # print(l_features[-1].shape)
 
         # print(l_features[-1].shape)
-        features = self.backbone(l_features[-1].transpose(0,1).contiguous().unsqueeze(0))
-
-        rcnn_cls = self.cls_layer(l_features[-1]).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
-        rcnn_reg = self.reg_layer(l_features[-1]).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
+        features = self.backbone(l_features[-1].transpose(0,1).contiguous().unsqueeze(0)).squeeze(0).transpose(0,1).contiguous()
+        # print(features.shape)
+        rcnn_cls = self.cls_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
+        rcnn_reg = self.reg_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
         # print(rcnn_cls.shape)
         ret_dict = {'rcnn_cls': rcnn_cls, 'rcnn_reg': rcnn_reg}
 
