@@ -102,7 +102,7 @@ class DenseRCNN(nn.Module):
         # classification layer
         cls_channel = 1 if num_classes == 2 else num_classes
         cls_layers = []
-        channel_in = backbone.channel_out
+        channel_in = self.backbone.channel_out
         pre_channel = channel_in
         for k in range(0, cfg.RCNN.CLS_FC.__len__()):
             cls_layers.append(pt_utils.Conv1d(pre_channel, cfg.RCNN.CLS_FC[k], bn=cfg.RCNN.USE_BN))
