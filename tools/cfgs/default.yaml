@@ -94,7 +94,7 @@ RCNN:
     USE_BN: False
     DP_RATIO: 0.0
 
-    BACKBONE: pointnet  # pointnet, edgeconv, rotnet, deepgcn
+    BACKBONE: pointnet  # pointnet, edgeconv, rotnet, deepgcn, refine
     XYZ_UP_LAYER: [128, 128]
 
     NUM_POINTS: 512
