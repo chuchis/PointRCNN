@@ -23,6 +23,7 @@ CLS_MEAN_SIZE: [[1.52563191462, 1.62856739989, 3.88311640418]]
 RPN:
     ENABLED: True
     FIXED: False
+    LOAD_RPN_ONLY: False
 
     # config of input
     USE_INTENSITY: False
@@ -125,6 +126,9 @@ RCNN:
         PIXEL_SIZE: 0.0625
         IM_SIZE_M: [4, 4]
         CONV_FEAT_MULTIPLIER: 4
+
+    REF_CONFIG:
+        PRE_REFINE: True
 
     CLS_FC: [256, 256]
     REG_FC: [256, 256]
