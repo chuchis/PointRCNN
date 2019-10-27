@@ -965,7 +965,7 @@ class RefineRCNNNet(nn.Module):
         opt.head=False
         opt.in_channels = 512
         # opts.constant_dilation=True
-        opt.kernel_size=8
+        opt.kernel_size=6
         opt.constant_dilation=True
         self.backbone = DenseDeepGCN(opt)
         if cfg.RCNN.USE_RPN_FEATURES:
