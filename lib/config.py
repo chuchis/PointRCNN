@@ -35,6 +35,7 @@ __C.CLS_MEAN_SIZE = np.array([[1.52, 1.63, 3.88]], dtype=np.float32)
 __C.RPN = edict()
 __C.RPN.ENABLED = True
 __C.RPN.FIXED = False
+__C.RPN.LOAD_RPN_ONLY = False
 
 __C.RPN.USE_INTENSITY = True
 
@@ -134,6 +135,8 @@ __C.RCNN.ROT_CONFIG.KERNEL_SIZE = [5, 5, 3, 3]
 __C.RCNN.ROT_CONFIG.STRIDE = [2, 2, 2, 2]
 __C.RCNN.ROT_CONFIG.PIXEL_SIZE = 0.0625
 __C.RCNN.ROT_CONFIG.IM_SIZE_M = [4, 4]
+__C.RCNN.REF_CONFIG = edict()
+__C.RCNN.REF_CONFIG.PRE_REFINE = True
 __C.RCNN.CLS_FC = [256, 256]
 __C.RCNN.REG_FC = [256, 256]
 

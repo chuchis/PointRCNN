@@ -966,6 +966,7 @@ class RefineRCNNNet(nn.Module):
         opt.in_channels = 512
         # opts.constant_dilation=True
         opt.kernel_size=8
+        opt.constant_dilation=True
         self.backbone = DenseDeepGCN(opt)
         if cfg.RCNN.USE_RPN_FEATURES:
             self.rcnn_input_channel = 3 + int(cfg.RCNN.USE_INTENSITY) + int(cfg.RCNN.USE_MASK) + int(cfg.RCNN.USE_DEPTH)
@@ -1132,11 +1133,14 @@ class RefineRCNNNet(nn.Module):
             li_xyz, li_features = self.SA_modules[i](l_xyz[i], l_features[i])
             l_xyz.append(li_xyz)
             l_features.append(li_features)
-        # print(l_features[-1].shape)
 
+        # print(input_data.shape)
         # print(l_features[-1].shape)
+        # print(xyz.shape)
         features = self.backbone(l_features[-1].transpose(0,1).contiguous().unsqueeze(0)).squeeze(0).transpose(0,1).contiguous()
-        # print(features.shape)
+        
+
+
         rcnn_cls = self.cls_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
         rcnn_reg = self.reg_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
         # print(rcnn_cls.shape)
@@ -1145,4 +1149,3 @@ class RefineRCNNNet(nn.Module):
         if self.training:
             ret_dict.update(target_dict)
         return ret_dict
-
