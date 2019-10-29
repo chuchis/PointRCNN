@@ -54,7 +54,7 @@ parser.add_argument("--rcnn_eval_feature_dir", type=str, default=None,
 parser.add_argument('--set', dest='set_cfgs', default=None, nargs=argparse.REMAINDER,
                     help='set extra config keys if needed')
 args = parser.parse_args()
-
+cfg.BATCH_SIZE = args.batch_size
 
 def create_logger(log_file):
     log_format = '%(asctime)s  %(levelname)5s  %(message)s'

@@ -30,6 +30,7 @@ __C.PC_AREA_SCOPE = np.array([[-40, 40],
 
 __C.CLS_MEAN_SIZE = np.array([[1.52, 1.63, 3.88]], dtype=np.float32)
 
+__C.BATCH_SIZE = 4
 
 # 1. config of rpn network
 __C.RPN = edict()

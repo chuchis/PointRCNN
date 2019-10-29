@@ -17,6 +17,7 @@ GT_AUG_HARD_RATIO: 0.6
 PC_REDUCE_BY_RANGE: True
 PC_AREA_SCOPE: [[-40, 40], [-1,   3], [0, 70.4]]  # x, y, z scope in rect camera coords
 CLS_MEAN_SIZE: [[1.52563191462, 1.62856739989, 3.88311640418]]
+BATCH_SIZE: 4
 
 
 # 1. config of rpn network
