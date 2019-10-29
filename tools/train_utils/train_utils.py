@@ -83,7 +83,14 @@ def load_checkpoint(model=None, optimizer=None, filename='checkpoint', logger=cu
         epoch = checkpoint['epoch'] if 'epoch' in checkpoint.keys() else -1
         it = checkpoint.get('it', 0.0)
         if model is not None and checkpoint['model_state'] is not None:
-            model.load_state_dict(checkpoint['model_state'])
+            model_state = checkpoint['model_state']
+            if cfg.RPN.LOAD_RPN_ONLY:
+                update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rpn" in key}
+            else:
+                update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict()}
+            state_dict = model.state_dict()
+            state_dict.update(update_model_state)
+            model.load_state_dict(state_dict)
         if optimizer is not None and checkpoint['optimizer_state'] is not None:
             optimizer.load_state_dict(checkpoint['optimizer_state'])
         logger.info("==> Done")
