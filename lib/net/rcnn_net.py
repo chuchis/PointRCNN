@@ -965,7 +965,7 @@ class RefineRCNNNet(nn.Module):
         opt.head=False
         opt.in_channels = 512
         # opts.constant_dilation=True
-        opt.kernel_size=6
+        opt.kernel_size=16
         opt.constant_dilation=True
         self.backbone = DenseDeepGCN(opt)
         if cfg.RCNN.USE_RPN_FEATURES:
@@ -1136,9 +1136,15 @@ class RefineRCNNNet(nn.Module):
 
         # print(input_data.shape)
         # print(l_features[-1].shape)
+        if self.training:
+            num_proposals = cfg.RCNN.ROI_PER_IMAGE
+        else:
+            num_proposals = cfg.TEST.RPN_POST_NMS_TOP_N
+        features = l_features[-1].view(cfg.BATCH_SIZE,num_proposals,l_features[-1].shape[1],1).contiguous().transpose(1,2).contiguous()
+        # print(features.shape)
         # print(xyz.shape)
-        features = self.backbone(l_features[-1].transpose(0,1).contiguous().unsqueeze(0)).squeeze(0).transpose(0,1).contiguous()
-        
+        features = self.backbone(features).transpose(1,2).contiguous().view(cfg.BATCH_SIZE*num_proposals,-1,1).contiguous()
+        # print(features.shape)
 
 
         rcnn_cls = self.cls_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
