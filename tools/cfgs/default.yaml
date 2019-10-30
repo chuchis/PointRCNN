@@ -24,7 +24,7 @@ BATCH_SIZE: 4
 RPN:
     ENABLED: True
     FIXED: False
-    LOAD_RPN_ONLY: False
+    LOAD_RPN_ONLY: True
 
     # config of input
     USE_INTENSITY: False
@@ -130,6 +130,10 @@ RCNN:
 
     REF_CONFIG:
         PRE_REFINE: True
+        N_FILTERS: 64
+        KERNEL_SIZE: 16
+        N_BLOCKS: 20
+        CONV: 'mr'
 
     CLS_FC: [256, 256]
     REG_FC: [256, 256]
