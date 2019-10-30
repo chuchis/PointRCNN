@@ -45,6 +45,8 @@ parser.add_argument("--rcnn_eval_roi_dir", type=str, default=None,
                     help='specify the saved rois for rcnn evaluation when using rcnn_offline mode')
 parser.add_argument("--rcnn_eval_feature_dir", type=str, default=None,
                     help='specify the saved features for rcnn evaluation when using rcnn_offline mode')
+parser.add_argument('--set', dest='set_cfgs', default=None, nargs=argparse.REMAINDER,
+                    help='set extra config keys if needed')
 args = parser.parse_args()
 cfg.BATCH_SIZE = args.batch_size
 
@@ -146,6 +148,8 @@ def create_scheduler(optimizer, total_steps, last_epoch):
 if __name__ == "__main__":
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
+    if args.set_cfgs is not None:
+        cfg_from_list(args.set_cfgs)
     cfg.TAG = os.path.splitext(os.path.basename(args.cfg_file))[0]
 
     if args.train_mode == 'rpn':
