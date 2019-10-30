@@ -104,12 +104,14 @@ def load_part_ckpt(model, filename, logger=cur_logger, total_keys=-1):
     if os.path.isfile(filename):
         logger.info("==> Loading part model from checkpoint '{}'".format(filename))
         checkpoint = torch.load(filename)
+        #print("loaded")
         model_state = checkpoint['model_state']
+        #print("filtering")
         if cfg.RPN.LOAD_RPN_ONLY:
             update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rpn" in key}
         else:
             update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict()}
-        # [print(key) for key, val in model_state.items() if key in model.state_dict()]
+        #[print(key) for key, val in model_state.items() if key in model.state_dict()]
         state_dict = model.state_dict()
         state_dict.update(update_model_state)
         model.load_state_dict(state_dict)

@@ -212,14 +212,14 @@ class DenseRCNN(nn.Module):
 
                 pts_input = pooled_features.view(-1, pooled_features.shape[2], pooled_features.shape[3])
         else:
-            pts_input = input_data['pts_input']
+            pts_input = input_data['pts_input'].view(-1,512,133)
             target_dict = {}
-            target_dict['pts_input'] = input_data['pts_input']
-            target_dict['roi_boxes3d'] = input_data['roi_boxes3d']
+            target_dict['pts_input'] = input_data['pts_input'].view(-1,512,133)
+            target_dict['roi_boxes3d'] = input_data['roi_boxes3d'].view(-1,7)
             if self.training:
-                target_dict['cls_label'] = input_data['cls_label']
-                target_dict['reg_valid_mask'] = input_data['reg_valid_mask']
-                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct']
+                target_dict['cls_label'] = input_data['cls_label'].view(-1)
+                target_dict['reg_valid_mask'] = input_data['reg_valid_mask'].view(-1)
+                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct'].view(-1,7)
 
         xyz, features = self._break_up_pc(pts_input)
         # print(xyz)
@@ -914,19 +914,26 @@ class RCNNNet(nn.Module):
 
                 pts_input = pooled_features.view(-1, pooled_features.shape[2], pooled_features.shape[3])
         else:
-            pts_input = input_data['pts_input']
+            pts_input = input_data['pts_input'].view(-1,512,133).contiguous()
             target_dict = {}
-            target_dict['pts_input'] = input_data['pts_input']
-            target_dict['roi_boxes3d'] = input_data['roi_boxes3d']
+            target_dict['pts_input'] = input_data['pts_input'].view(-1,512,133).contiguous()
+            target_dict['roi_boxes3d'] = input_data['roi_boxes3d'].view(-1,7)
+            #print(target_dict['roi_boxes3d'].shape)
             if self.training:
-                target_dict['cls_label'] = input_data['cls_label']
-                target_dict['reg_valid_mask'] = input_data['reg_valid_mask']
-                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct']
+                target_dict['cls_label'] = input_data['cls_label'].view(-1).contiguous()
+                #print(target_dict['cls_label'].shape)
+                target_dict['reg_valid_mask'] = input_data['reg_valid_mask'].view(-1).contiguous()
+                #print(target_dict['reg_valid_mask'].shape)
+                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct'].view(-1,7).contiguous()
+                #print(target_dict['gt_of_rois'].shape)
 
         xyz, features = self._break_up_pc(pts_input)
-
+        #print(xyz.shape, features.shape)
         if cfg.RCNN.USE_RPN_FEATURES:
+            #print(pts_input.shape)
+            
             xyz_input = pts_input[..., 0:self.rcnn_input_channel].transpose(1, 2).unsqueeze(dim=3)
+            #print(xyz_input.shape)
             xyz_feature = self.xyz_up_layer(xyz_input)
 
             rpn_feature = pts_input[..., self.rcnn_input_channel:].transpose(1, 2).unsqueeze(dim=3)
@@ -942,8 +949,8 @@ class RCNNNet(nn.Module):
             li_xyz, li_features = self.SA_modules[i](l_xyz[i], l_features[i])
             l_xyz.append(li_xyz)
             l_features.append(li_features)
-        # print(l_features[-1].shape)
-
+        #print(l_features[-1].shape)
+        #print(li_xyz.shape, li_features.shape)
         rcnn_cls = self.cls_layer(l_features[-1]).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
         rcnn_reg = self.reg_layer(l_features[-1]).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
         # print(rcnn_cls.shape)
@@ -1105,19 +1112,20 @@ class RefineRCNNNet(nn.Module):
 
                 pts_input = pooled_features.view(-1, pooled_features.shape[2], pooled_features.shape[3])
         else:
-            pts_input = input_data['pts_input']
+            pts_input = input_data['pts_input'].view(-1,512,133)
             target_dict = {}
-            target_dict['pts_input'] = input_data['pts_input']
-            target_dict['roi_boxes3d'] = input_data['roi_boxes3d']
+            target_dict['pts_input'] = input_data['pts_input'].view(-1,512,133)
+            target_dict['roi_boxes3d'] = input_data['roi_boxes3d'].view(-1,7)
             if self.training:
-                target_dict['cls_label'] = input_data['cls_label']
-                target_dict['reg_valid_mask'] = input_data['reg_valid_mask']
-                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct']
+                target_dict['cls_label'] = input_data['cls_label'].view(-1)
+                target_dict['reg_valid_mask'] = input_data['reg_valid_mask'].view(-1)
+                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct'].view(-1,7)
 
         xyz, features = self._break_up_pc(pts_input)
 
         if cfg.RCNN.USE_RPN_FEATURES:
             xyz_input = pts_input[..., 0:self.rcnn_input_channel].transpose(1, 2).unsqueeze(dim=3)
+            #print(xyz_input.shape)
             xyz_feature = self.xyz_up_layer(xyz_input)
 
             rpn_feature = pts_input[..., self.rcnn_input_channel:].transpose(1, 2).unsqueeze(dim=3)
@@ -1141,10 +1149,10 @@ class RefineRCNNNet(nn.Module):
         else:
             num_proposals = cfg.TEST.RPN_POST_NMS_TOP_N
         features = l_features[-1].view(cfg.BATCH_SIZE,num_proposals,l_features[-1].shape[1],1).contiguous().transpose(1,2).contiguous()
-        # print(features.shape)
+        #print(features.shape)
         # print(xyz.shape)
         features = self.backbone(features).transpose(1,2).contiguous().view(cfg.BATCH_SIZE*num_proposals,-1,1).contiguous()
-        # print(features.shape)
+        #print(features.shape)
 
 
         rcnn_cls = self.cls_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
