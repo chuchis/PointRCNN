@@ -13,7 +13,7 @@ from functools import partial
 from lib.net.point_rcnn import PointRCNN
 import lib.net.train_functions as train_functions
 from lib.datasets.kitti_rcnn_dataset import KittiRCNNDataset
-from lib.config import cfg, cfg_from_file, save_config_to_file
+from lib.config import cfg, cfg_from_file, save_config_to_file, cfg_from_list
 import tools.train_utils.train_utils as train_utils
 from tools.train_utils.fastai_optim import OptimWrapper
 from tools.train_utils import learning_schedules_fastai as lsf
@@ -45,8 +45,10 @@ parser.add_argument("--rcnn_eval_roi_dir", type=str, default=None,
                     help='specify the saved rois for rcnn evaluation when using rcnn_offline mode')
 parser.add_argument("--rcnn_eval_feature_dir", type=str, default=None,
                     help='specify the saved features for rcnn evaluation when using rcnn_offline mode')
-parser.add_argument('--set', dest='set_cfgs', default=None, nargs=argparse.REMAINDER,
+parser.add_argument('--set_cfgs', default=None, nargs=2,
                     help='set extra config keys if needed')
+# parser.add_argument('--set', dest='set_cfgs', default=None, nargs=argparse.REMAINDER,
+#                     help='set extra config keys if needed')
 args = parser.parse_args()
 cfg.BATCH_SIZE = args.batch_size
 
