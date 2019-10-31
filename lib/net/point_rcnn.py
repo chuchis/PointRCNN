@@ -33,7 +33,7 @@ class PointRCNN(nn.Module):
             elif cfg.RCNN.BACKBONE == 'refine':
                 # rcnn_input_channels = 256
                 self.rcnn_net = RefineRCNNNet(num_classes=num_classes, input_channels=rcnn_input_channels, use_xyz=use_xyz)
-            elif cfg.RCNN.BACKBONE == 'refinedeep':
+            elif cfg.RCNN.BACKBONE == 'deeprefine':
                 # rcnn_input_channels = 256
                 self.rcnn_net = RefineDeepRCNNNet(num_classes=num_classes, input_channels=rcnn_input_channels, use_xyz=use_xyz)
             else:
