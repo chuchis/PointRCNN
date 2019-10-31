@@ -116,6 +116,7 @@ RCNN:
         KERNEL_SIZE: 16
         N_BLOCKS: 20
         CONV: 'mr'
+        CONSTANT_DILATION: False
 
     ROT_CONFIG:
         DEGREE_RES: 5
