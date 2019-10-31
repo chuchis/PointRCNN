@@ -91,7 +91,7 @@ class DenseOpts():
         self.in_channels = 3
         self.block = 'res'
         self.head = True
-        self.constant_dilation = False
+        self.constant_dilation = cfg.RCNN.DEEPGCN_CONFIG.CONSTANT_DILATION
 
 class DenseRCNN(nn.Module):
     def __init__(self, num_classes, input_channels=0, use_xyz=True):
