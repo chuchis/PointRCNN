@@ -135,6 +135,7 @@ RCNN:
         KERNEL_SIZE: 16
         N_BLOCKS: 20
         CONV: 'mr'
+        USE_RCNN_FEATS: True
 
     CLS_FC: [256, 256]
     REG_FC: [256, 256]
