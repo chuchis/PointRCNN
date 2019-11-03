@@ -1102,8 +1102,11 @@ class KittiRCNNDataset(KittiDataset):
         return sample_info
 
     def collate_batch(self, batch):
+        #print(batch)
+        #print(batch.__len__())
+        #print(batch[0].shape)
         if self.mode != 'TRAIN' and cfg.RCNN.ENABLED and not cfg.RPN.ENABLED:
-            assert batch.__len__() == 1
+            #assert batch.__len__() == 1
             return batch[0]
 
         batch_size = batch.__len__()

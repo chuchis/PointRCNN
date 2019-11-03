@@ -914,17 +914,17 @@ class RCNNNet(nn.Module):
 
                 pts_input = pooled_features.view(-1, pooled_features.shape[2], pooled_features.shape[3])
         else:
-            pts_input = input_data['pts_input'].view(-1,512,133).contiguous()
+            pts_input = input_data['pts_input'].view(-1,512,133)
             target_dict = {}
-            target_dict['pts_input'] = input_data['pts_input'].view(-1,512,133).contiguous()
+            target_dict['pts_input'] = input_data['pts_input'].view(-1,512,133)
             target_dict['roi_boxes3d'] = input_data['roi_boxes3d'].view(-1,7)
             #print(target_dict['roi_boxes3d'].shape)
             if self.training:
-                target_dict['cls_label'] = input_data['cls_label'].view(-1).contiguous()
+                target_dict['cls_label'] = input_data['cls_label'].view(-1)
                 #print(target_dict['cls_label'].shape)
-                target_dict['reg_valid_mask'] = input_data['reg_valid_mask'].view(-1).contiguous()
+                target_dict['reg_valid_mask'] = input_data['reg_valid_mask'].view(-1)
                 #print(target_dict['reg_valid_mask'].shape)
-                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct'].view(-1,7).contiguous()
+                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct'].view(-1,7)
                 #print(target_dict['gt_of_rois'].shape)
 
         xyz, features = self._break_up_pc(pts_input)
@@ -1151,10 +1151,13 @@ class RefineRCNNNet(nn.Module):
             num_proposals = cfg.RCNN.ROI_PER_IMAGE
         else:
             num_proposals = cfg.TEST.RPN_POST_NMS_TOP_N
-        features = l_features[-1].view(cfg.BATCH_SIZE,num_proposals,l_features[-1].shape[1],1).contiguous().transpose(1,2).contiguous()
+        if cfg.BATCH_SIZE == 1:
+            features = l_features[-1].view(1,-1,l_features[-1].shape[1],1).contiguous().transpose(1,2).contiguous()
+        else:
+            features = l_features[-1].view(-1,num_proposals,l_features[-1].shape[1],1).contiguous().transpose(1,2).contiguous()
         #print(features.shape)
         # print(xyz.shape)
-        features = self.backbone(features).transpose(1,2).contiguous().view(cfg.BATCH_SIZE*num_proposals,-1,1).contiguous()
+        features = self.backbone(features).transpose(1,2).contiguous().view(-1,self.backbone.channel_out,1).contiguous()
         #print(features.shape)
 
 

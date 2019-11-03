@@ -85,6 +85,7 @@ def load_checkpoint(model=None, optimizer=None, filename='checkpoint', logger=cu
         if model is not None and checkpoint['model_state'] is not None:
             model_state = checkpoint['model_state']
             if cfg.RPN.LOAD_RPN_ONLY:
+                print("Loading RPN only")
                 update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rpn" in key}
             else:
                 update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict()}
@@ -108,6 +109,7 @@ def load_part_ckpt(model, filename, logger=cur_logger, total_keys=-1):
         model_state = checkpoint['model_state']
         #print("filtering")
         if cfg.RPN.LOAD_RPN_ONLY:
+            print("Loading RPN only")
             update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rpn" in key}
         else:
             update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict()}
