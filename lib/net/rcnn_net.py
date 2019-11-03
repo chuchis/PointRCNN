@@ -998,6 +998,8 @@ class RefineRCNNNet(nn.Module):
         cls_channel = 1 if num_classes == 2 else num_classes
         cls_layers = []
         channel_in = self.backbone.channel_out
+        if cfg.RCNN.REF_CONFIG.USE_RCNN_FEATS:
+            channel_in += opt.in_channels
 
         pre_channel = channel_in
         for k in range(0, cfg.RCNN.CLS_FC.__len__()):
@@ -1148,8 +1150,10 @@ class RefineRCNNNet(nn.Module):
         # print(xyz.shape)
         features = self.backbone(features).transpose(1,2).contiguous().view(cfg.BATCH_SIZE*num_proposals,-1,1).contiguous()
         # print(features.shape)
-
-
+        if cfg.RCNN.REF_CONFIG.USE_RCNN_FEATS:
+            #print(features.shape, l_features[-1].shape)
+            features = torch.cat((features, l_features[-1]), dim=1)
+            # print(features.shape)
         rcnn_cls = self.cls_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
         rcnn_reg = self.reg_layer(features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
         # print(rcnn_cls.shape)
@@ -1328,3 +1332,4 @@ class RefineDeepRCNNNet(nn.Module):
         if self.training:
             ret_dict.update(target_dict)
         return ret_dict
+
