@@ -212,14 +212,14 @@ class DenseRCNN(nn.Module):
 
                 pts_input = pooled_features.view(-1, pooled_features.shape[2], pooled_features.shape[3])
         else:
-            pts_input = input_data['pts_input']
+            pts_input = input_data['pts_input'].view(-1,512,133)
             target_dict = {}
-            target_dict['pts_input'] = input_data['pts_input']
-            target_dict['roi_boxes3d'] = input_data['roi_boxes3d']
+            target_dict['pts_input'] = input_data['pts_input'].view(-1,512,133)
+            target_dict['roi_boxes3d'] = input_data['roi_boxes3d'].view(-1,7)
             if self.training:
-                target_dict['cls_label'] = input_data['cls_label']
-                target_dict['reg_valid_mask'] = input_data['reg_valid_mask']
-                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct']
+                target_dict['cls_label'] = input_data['cls_label'].view(-1)
+                target_dict['reg_valid_mask'] = input_data['reg_valid_mask'].view(-1)
+                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct'].view(-1,7)
 
         xyz, features = self._break_up_pc(pts_input)
         # print(xyz)
@@ -364,14 +364,14 @@ class DenseFeatRCNN(nn.Module):
 
                 pts_input = pooled_features.view(-1, pooled_features.shape[2], pooled_features.shape[3])
         else:
-            pts_input = input_data['pts_input']
+            pts_input = input_data['pts_input'].view(-1,512,133)
             target_dict = {}
-            target_dict['pts_input'] = input_data['pts_input']
-            target_dict['roi_boxes3d'] = input_data['roi_boxes3d']
+            target_dict['pts_input'] = input_data['pts_input'].view(-1,512,133)
+            target_dict['roi_boxes3d'] = input_data['roi_boxes3d'].view(-1,7)
             if self.training:
-                target_dict['cls_label'] = input_data['cls_label']
-                target_dict['reg_valid_mask'] = input_data['reg_valid_mask']
-                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct']
+                target_dict['cls_label'] = input_data['cls_label'].view(-1)
+                target_dict['reg_valid_mask'] = input_data['reg_valid_mask'].view(-1)
+                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct'].view(-1,7)
 
         xyz, features = self._break_up_pc(pts_input)
 
@@ -1080,14 +1080,14 @@ class RCNNNet(nn.Module):
 
                 pts_input = pooled_features.view(-1, pooled_features.shape[2], pooled_features.shape[3])
         else:
-            pts_input = input_data['pts_input']
+            pts_input = input_data['pts_input'].view(-1,512,133)
             target_dict = {}
-            target_dict['pts_input'] = input_data['pts_input']
-            target_dict['roi_boxes3d'] = input_data['roi_boxes3d']
+            target_dict['pts_input'] = input_data['pts_input'].view(-1,512,133)
+            target_dict['roi_boxes3d'] = input_data['roi_boxes3d'].view(-1,7)
             if self.training:
-                target_dict['cls_label'] = input_data['cls_label']
-                target_dict['reg_valid_mask'] = input_data['reg_valid_mask']
-                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct']
+                target_dict['cls_label'] = input_data['cls_label'].view(-1)
+                target_dict['reg_valid_mask'] = input_data['reg_valid_mask'].view(-1)
+                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct'].view(-1,7)
 
         xyz, features = self._break_up_pc(pts_input)
 
@@ -1276,14 +1276,14 @@ class RefineRCNNNet(nn.Module):
 
                 pts_input = pooled_features.view(-1, pooled_features.shape[2], pooled_features.shape[3])
         else:
-            pts_input = input_data['pts_input']
+            pts_input = input_data['pts_input'].view(-1,512,133)
             target_dict = {}
-            target_dict['pts_input'] = input_data['pts_input']
-            target_dict['roi_boxes3d'] = input_data['roi_boxes3d']
+            target_dict['pts_input'] = input_data['pts_input'].view(-1,512,133)
+            target_dict['roi_boxes3d'] = input_data['roi_boxes3d'].view(-1,7)
             if self.training:
-                target_dict['cls_label'] = input_data['cls_label']
-                target_dict['reg_valid_mask'] = input_data['reg_valid_mask']
-                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct']
+                target_dict['cls_label'] = input_data['cls_label'].view(-1)
+                target_dict['reg_valid_mask'] = input_data['reg_valid_mask'].view(-1)
+                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct'].view(-1,7)
 
         xyz, features = self._break_up_pc(pts_input)
 
@@ -1463,14 +1463,14 @@ class RefineDeepRCNNNet(nn.Module):
 
                 pts_input = pooled_features.view(-1, pooled_features.shape[2], pooled_features.shape[3])
         else:
-            pts_input = input_data['pts_input']
+            pts_input = input_data['pts_input'].view(-1,512,133)
             target_dict = {}
-            target_dict['pts_input'] = input_data['pts_input']
-            target_dict['roi_boxes3d'] = input_data['roi_boxes3d']
+            target_dict['pts_input'] = input_data['pts_input'].view(-1,512,133)
+            target_dict['roi_boxes3d'] = input_data['roi_boxes3d'].view(-1,7)
             if self.training:
-                target_dict['cls_label'] = input_data['cls_label']
-                target_dict['reg_valid_mask'] = input_data['reg_valid_mask']
-                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct']
+                target_dict['cls_label'] = input_data['cls_label'].view(-1)
+                target_dict['reg_valid_mask'] = input_data['reg_valid_mask'].view(-1)
+                target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct'].view(-1,7)
 
         xyz, features = self._break_up_pc(pts_input)
 
