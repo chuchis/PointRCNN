@@ -117,6 +117,7 @@ RCNN:
         N_BLOCKS: 20
         CONV: 'mr'
         CONSTANT_DILATION: False
+        LINEAR_DILATION: True
 
     ROT_CONFIG:
         DEGREE_RES: 5
@@ -136,6 +137,9 @@ RCNN:
         N_BLOCKS: 20
         CONV: 'mr'
         USE_RCNN_FEATS: True
+        CONSTANT_DILATION: False
+        LINEAR_DILATION: False
+        USE_PROPOSALS: True
 
     CLS_FC: [256, 256]
     REG_FC: [256, 256]
@@ -160,7 +164,7 @@ RCNN:
 # general training config
 TRAIN:
     SPLIT: train
-    VAL_SPLIT: smallval
+    VAL_SPLIT: val
 
     LR: 0.002
     LR_CLIP: 0.00001

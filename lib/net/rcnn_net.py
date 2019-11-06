@@ -36,7 +36,10 @@ class DenseDeepGCN(torch.nn.Module):
         if opt.constant_dilation:
             dilation = lambda x: 1
         else:
-            dilation = lambda x: x+1
+            if opt.linear_dilation:
+                dilation = lambda x: x+1
+            else:
+                dilation = lambda x: (x+1)%5
         if opt.block.lower() == 'res':
             self.backbone = Seq(*[ResDynBlock2d(channels, k, dilation(i), conv, act, norm, bias, stochastic, epsilon)
                                   for i in range(self.n_blocks-1)])
@@ -92,6 +95,7 @@ class DenseOpts():
         self.block = 'res'
         self.head = True
         self.constant_dilation = cfg.RCNN.DEEPGCN_CONFIG.CONSTANT_DILATION
+        self.linear_dilation = cfg.RCNN.DEEPGCN_CONFIG.LINEAR_DILATION
 
 class DenseRCNN(nn.Module):
     def __init__(self, num_classes, input_channels=0, use_xyz=True):
@@ -1132,7 +1136,7 @@ class RefineRCNNNet(nn.Module):
         channel_in = input_channels
         opt = DenseOpts()
         opt.head=False
-        opt.in_channels = 512
+        opt.in_channels = 512 + 7 * cfg.RCNN.REF_CONFIG.USE_PROPOSALS
         # opts.constant_dilation=True
         opt.n_blocks = cfg.RCNN.REF_CONFIG.N_BLOCKS
         opt.kernel_size = cfg.RCNN.REF_CONFIG.KERNEL_SIZE
@@ -1313,8 +1317,20 @@ class RefineRCNNNet(nn.Module):
         # print(l_features[-1].shape)
         if self.training:
             num_proposals = cfg.RCNN.ROI_PER_IMAGE
+            proposals = target_dict['roi_boxes3d']
         else:
             num_proposals = cfg.TEST.RPN_POST_NMS_TOP_N
+            proposals = input_data['roi_boxes3d']
+        if cfg.RCNN.REF_CONFIG.USE_PROPOSALS:
+            proposals[:,0] = proposals[:,0]/80 + 0.5
+            proposals[:,1] = proposals[:,0]/10 + 0.5
+            proposals[:,2] = proposals[:,0]/70
+            proposals[:,3] = proposals[:,0]/5
+            proposals[:,4] = proposals[:,0]/10
+            proposals[:,5] = proposals[:,0]/5
+            proposals[:,6] = proposals[:,0]/(2*np.pi) + 0.5
+            l_features[-1] = torch.cat((l_features[-1], proposals.unsqueeze(2)), dim=1)
+
         if cfg.BATCH_SIZE == 1:
             features = l_features[-1].view(1,-1,l_features[-1].shape[1],1).contiguous().transpose(1,2).contiguous()
         else:
@@ -1322,6 +1338,7 @@ class RefineRCNNNet(nn.Module):
         #print(features.shape)
         # print(xyz.shape)
         features = self.backbone(features).transpose(1,2).contiguous().view(-1,self.backbone.channel_out,1).contiguous()
+
         if cfg.RCNN.REF_CONFIG.USE_RCNN_FEATS:
             #print(features.shape, l_features[-1].shape)
             features = torch.cat((features, l_features[-1]), dim=1)
