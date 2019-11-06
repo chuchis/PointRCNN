@@ -1,0 +1,2 @@
+#!/bin/bash
+sh cluster_experiments.sh Offline_Eval_All eval_rcnn.py --eval_mode rcnn_offline --rcnn_eval_roi_dir /ibex/scratch/zarzarj/PointRCNN/output/pretrained_offline_eval/eval/epoch_no_number/val/detections/data --rcnn_eval_feature_dir /ibex/scratch/zarzarj/PointRCNN/output/pretrained_offline_eval/eval/epoch_no_number/val/features --eval_all --time 20:00:00 --set RPN.LOAD_RPN_ONLY False --set BATCH_SIZE 1

@@ -1,0 +1,2 @@
+#!/bin/bash
+sh cluster_experiments.sh Train_Offline train_rcnn.py $@ --train_with_eval --train_mode rcnn_offline --epochs 100 --ckpt_save_interval 1 --rcnn_training_roi_dir /ibex/scratch/zarzarj/PointRCNN/output/pretrained_offline_train/eval/epoch_no_number/train_aug/detections/data --rcnn_training_feature_dir /ibex/scratch/zarzarj/PointRCNN/output/pretrained_offline_train/eval/epoch_no_number/train_aug/features --batch_size 4
