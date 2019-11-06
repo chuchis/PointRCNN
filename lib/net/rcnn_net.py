@@ -1488,11 +1488,14 @@ class RefineDeepRCNNNet(nn.Module):
             num_proposals = cfg.RCNN.ROI_PER_IMAGE
         else:
             num_proposals = cfg.TEST.RPN_POST_NMS_TOP_N
-
-        ref_features_prep = features.view(cfg.BATCH_SIZE,num_proposals,features.shape[1],1).contiguous().transpose(1,2).contiguous()
+        if cfg.BATCH_SIZE == 1:
+            ref_features_prep = features.view(1,-1,features.shape[1],1).contiguous().transpose(1,2).contiguous()
+        else:
+            ref_features_prep = features.view(-1,num_proposals,features.shape[1],1).contiguous().transpose(1,2).contiguous()
+        #ref_features_prep = features.view(cfg.BATCH_SIZE,num_proposals,features.shape[1],1).contiguous().transpose(1,2).contiguous()
         # print(features.shape)
         # print(xyz.shape)
-        ref_features = self.refine(ref_features_prep).transpose(1,2).contiguous().view(cfg.BATCH_SIZE*num_proposals,-1,1).contiguous()
+        ref_features = self.refine(ref_features_prep).transpose(1,2).contiguous().view(-1,self.refine.channel_out,1).contiguous()
         # print(features.shape)
 
 
