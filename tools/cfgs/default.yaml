@@ -115,9 +115,10 @@ RCNN:
         N_FILTERS: 64
         KERNEL_SIZE: 16
         N_BLOCKS: 20
-        CONV: 'mr'
+        CONV: 'edge'
         CONSTANT_DILATION: False
         LINEAR_DILATION: True
+        BLOCK: res
 
     ROT_CONFIG:
         DEGREE_RES: 5
@@ -136,10 +137,10 @@ RCNN:
         KERNEL_SIZE: 16
         N_BLOCKS: 20
         CONV: 'mr'
-        USE_RCNN_FEATS: True
+        USE_RCNN_FEATS: False
         CONSTANT_DILATION: False
         LINEAR_DILATION: False
-        USE_PROPOSALS: True
+        USE_PROPOSALS: False
 
     CLS_FC: [256, 256]
     REG_FC: [256, 256]

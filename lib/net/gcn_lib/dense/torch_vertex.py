@@ -85,6 +85,19 @@ class ResDynBlock2d(nn.Module):
     def forward(self, x):
         return self.body(x) + x*self.res_scale
 
+class ResBlock2d(nn.Module):
+    """
+    Residual Dynamic graph convolution block
+    """
+    def __init__(self, in_channels, conv='edge', act='relu',
+                 norm=None, bias=True, res_scale=1):
+        super(ResBlock2d, self).__init__()
+        self.body = GraphConv2d(in_channels, in_channels, conv, act, norm, bias)
+        self.res_scale = res_scale
+
+    def forward(self, x, edge_idx):
+        return self.body(x, edge_idx) + x*self.res_scale
+
 
 class DenseDynBlock2d(nn.Module):
     """

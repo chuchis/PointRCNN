@@ -84,6 +84,8 @@ def _sigmoid_cross_entropy_with_logits(logits, labels):
     return loss
 
 
+
+
 def get_reg_loss(pred_reg, reg_label, loc_scope, loc_bin_size, num_head_bin, anchor_size,
                  get_xz_fine=True, get_y_by_bin=False, loc_y_scope=0.5, loc_y_bin_size=0.25, get_ry_fine=False):
 
@@ -134,12 +136,16 @@ def get_reg_loss(pred_reg, reg_label, loc_scope, loc_bin_size, num_head_bin, anc
         x_res_label = x_shift - (x_bin_label.float() * loc_bin_size + loc_bin_size / 2)
         z_res_label = z_shift - (z_bin_label.float() * loc_bin_size + loc_bin_size / 2)
         x_res_norm_label = x_res_label / loc_bin_size
+        # print(x_res_norm_label, x_res_norm_label.shape)
         z_res_norm_label = z_res_label / loc_bin_size
 
         x_bin_onehot = torch.cuda.FloatTensor(x_bin_label.size(0), per_loc_bin_num).zero_()
         x_bin_onehot.scatter_(1, x_bin_label.view(-1, 1).long(), 1)
         z_bin_onehot = torch.cuda.FloatTensor(z_bin_label.size(0), per_loc_bin_num).zero_()
         z_bin_onehot.scatter_(1, z_bin_label.view(-1, 1).long(), 1)
+
+        # print(x_bin_onehot, x_bin_onehot.shape)
+        # print(pred_reg[:, x_res_l: x_res_r], pred_reg[:, x_res_l: x_res_r].shape)
 
         loss_x_res = F.smooth_l1_loss((pred_reg[:, x_res_l: x_res_r] * x_bin_onehot).sum(dim=1), x_res_norm_label)
         loss_z_res = F.smooth_l1_loss((pred_reg[:, z_res_l: z_res_r] * z_bin_onehot).sum(dim=1), z_res_norm_label)
