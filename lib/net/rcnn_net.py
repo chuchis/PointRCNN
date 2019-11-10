@@ -12,7 +12,7 @@ import numpy as np
 
 import lib.utils.kitti_utils as kitti_utils
 import lib.utils.roipool3d.roipool3d_utils as roipool3d_utils
-from gcn_lib.dense import BasicConv, GraphConv2d, ResDynBlock2d, DenseDynBlock2d, DenseDilatedKnnGraph
+from gcn_lib.dense import BasicConv, GraphConv2d, ResDynBlock2d, DenseDynBlock2d, DenseDilatedKnnGraph, ResBlock2d
 from torch.nn import Sequential as Seq
 
 
@@ -47,8 +47,12 @@ class DenseDeepGCN(torch.nn.Module):
             self.backbone = Seq(*[DenseDynBlock2d(channels+c_growth*i, c_growth, k, dilation(i), conv, act,
                                                   norm, bias, stochastic, epsilon)
                                   for i in range(self.n_blocks-1)])
+        elif opt.block.lower() == 'res_fixed':
+            self.backbone = Seq(*[ResBlock2d(channels, conv, act, norm, bias)
+                                  for i in range(self.n_blocks-1)])
         else:
             raise NotImplementedError('{} is not implemented. Please check.\n'.format(opt.block))
+        self.block = opt.block.lower()
         self.fusion_block = BasicConv([channels+c_growth*(self.n_blocks-1), 1024], act, norm, bias)
         self.channel_out = 1024+channels+c_growth*(self.n_blocks-1)
 
@@ -67,13 +71,17 @@ class DenseDeepGCN(torch.nn.Module):
         # print(inputs.shape)
         #(B,C,N,1)
         if self.head_xyz:
-            feats = [self.head(inputs, self.knn(inputs[:, 0:3]))]
+            knn_edges = self.knn(inputs[:, 0:3])
         else:
-            feats = [self.head(inputs, self.knn(inputs))]
+            knn_edges = self.knn(inputs)
+        feats = [self.head(inputs, knn_edges)]
         # print(inputs.shape)
         for i in range(self.n_blocks-1):
             # print(feats[-1].shape)
-            feats.append(self.backbone[i](feats[-1]))
+            if self.block == 'res_fixed':
+                feats.append(self.backbone[i](feats[-1], knn_edges))
+            else:
+                feats.append(self.backbone[i](feats[-1]))
         feats = torch.cat(feats, dim=1)
 
         fusion = torch.max_pool2d(self.fusion_block(feats), kernel_size=[feats.shape[2], feats.shape[3]])
@@ -92,7 +100,7 @@ class DenseOpts():
         self.conv = cfg.RCNN.DEEPGCN_CONFIG.CONV # edge, mr
         self.n_blocks = cfg.RCNN.DEEPGCN_CONFIG.N_BLOCKS
         self.in_channels = 3
-        self.block = 'res'
+        self.block = cfg.RCNN.DEEPGCN_CONFIG.BLOCK
         self.head = True
         self.constant_dilation = cfg.RCNN.DEEPGCN_CONFIG.CONSTANT_DILATION
         self.linear_dilation = cfg.RCNN.DEEPGCN_CONFIG.LINEAR_DILATION

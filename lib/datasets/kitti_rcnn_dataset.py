@@ -239,7 +239,8 @@ class KittiRCNNDataset(KittiDataset):
                 else:
                     return self.get_rcnn_training_sample_batch(index)
             else:
-                return self.get_proposal_from_file(index)
+                #return self.get_proposal_from_file(index)
+                return self.get_rcnn_training_sample_batch(index)
         else:
             raise NotImplementedError
 

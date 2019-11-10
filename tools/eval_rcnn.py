@@ -45,7 +45,7 @@ parser.add_argument('--save_result', action='store_true', default=False, help='s
 parser.add_argument('--save_rpn_feature', action='store_true', default=False,
                     help='save features for separately rcnn training and evaluation')
 
-parser.add_argument('--random_select', action='store_true', default=True, help='sample to the same number of points')
+parser.add_argument('--random_select', action='store_true', default=True, help='samrple to the same number of points')
 parser.add_argument('--start_epoch', default=0, type=int, help='ignore the checkpoint smaller than this epoch')
 parser.add_argument("--rcnn_eval_roi_dir", type=str, default=None,
                     help='specify the saved rois for rcnn evaluation when using rcnn_offline mode')
@@ -335,6 +335,7 @@ def eval_one_epoch_rcnn(model, dataloader, epoch_id, result_dir, logger):
             gt_boxes3d = input_data['gt_boxes3d']
             gt_iou = input_data['gt_iou']
 
+
             # calculate recall
             gt_num = gt_boxes3d.shape[0]
             if gt_num > 0:
@@ -502,6 +503,8 @@ def eval_one_epoch_joint(model, dataloader, epoch_id, result_dir, logger):
 
         rcnn_cls = ret_dict['rcnn_cls'].view(batch_size, -1, ret_dict['rcnn_cls'].shape[1])
         rcnn_reg = ret_dict['rcnn_reg'].view(batch_size, -1, ret_dict['rcnn_reg'].shape[1])  # (B, M, C)
+        for key, val in data.items():
+            print(key, val.shape)
 
         # bounding box regression
         anchor_size = MEAN_SIZE

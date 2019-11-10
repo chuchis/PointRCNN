@@ -85,5 +85,6 @@ class PointRCNN(nn.Module):
             output = self.rcnn_net(input_data)
         else:
             raise NotImplementedError
-
+        # print(output['roi_boxes3d'])
+        # print()
         return output
