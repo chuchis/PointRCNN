@@ -1322,13 +1322,14 @@ class RefineRCNNNet(nn.Module):
             num_proposals = cfg.TEST.RPN_POST_NMS_TOP_N
             proposals = input_data['roi_boxes3d']
         if cfg.RCNN.REF_CONFIG.USE_PROPOSALS:
-            proposals[:,0] = proposals[:,0]/80 + 0.5
-            proposals[:,1] = proposals[:,0]/10 + 0.5
-            proposals[:,2] = proposals[:,0]/70
-            proposals[:,3] = proposals[:,0]/5
-            proposals[:,4] = proposals[:,0]/10
-            proposals[:,5] = proposals[:,0]/5
-            proposals[:,6] = proposals[:,0]/(2*np.pi) + 0.5
+            prop_norm = proposals
+            prop_norm[:,0] = proposals[:,0]/80 + 0.5
+            prop_norm[:,1] = proposals[:,1]/10 + 0.5
+            prop_norm[:,2] = proposals[:,2]/70
+            prop_norm[:,3] = proposals[:,3]/5
+            prop_norm[:,4] = proposals[:,4]/10
+            prop_norm[:,5] = proposals[:,5]/5
+            prop_norm[:,6] = proposals[:,6]/(2*np.pi) + 0.5
             l_features[-1] = torch.cat((l_features[-1], proposals.unsqueeze(2)), dim=1)
 
         if cfg.BATCH_SIZE == 1:

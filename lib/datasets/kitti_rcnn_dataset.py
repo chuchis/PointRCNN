@@ -85,7 +85,7 @@ class KittiRCNNDataset(KittiDataset):
                 self.sample_id_list = [int(sample_id) for sample_id in self.image_idx_list]
                 self.logger.info('Load testing samples from %s' % self.imageset_dir)
                 self.logger.info('Done: total test samples %d' % len(self.sample_id_list))
-        elif cfg.RCNN.ENABLED:
+        elif cfg.RCNN.ENABLED and mode != "TEST":
             for idx in range(0, self.num_sample):
                 sample_id = int(self.image_idx_list[idx])
                 obj_list = self.filtrate_objects(self.get_label(sample_id))
@@ -93,7 +93,6 @@ class KittiRCNNDataset(KittiDataset):
                     # logger.info('No gt classes: %06d' % sample_id)
                     continue
                 self.sample_id_list.append(sample_id)
-
             print('Done: filter %s results for rcnn training: %d / %d\n' %
                   (self.mode, len(self.sample_id_list), len(self.image_idx_list)))
 
@@ -119,7 +118,6 @@ class KittiRCNNDataset(KittiDataset):
             label_file = os.path.join(self.label_dir, '%06d.txt' % idx)
         else:
             label_file = os.path.join(self.aug_label_dir, '%06d.txt' % idx)
-
         assert os.path.exists(label_file)
         return kitti_utils.get_objects_from_label(label_file)
 

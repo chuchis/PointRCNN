@@ -4,7 +4,8 @@ refine_num_layers=(1 3 5 10 20 30 40)
 #refine_num_layers=(1)
 #deepgcn_num_layers=(1 3 5 10 20 30 40)
 deepgcn_num_layers=(1 3 5 10)
-#deepgcn_num_layers=(1)
+#deepgcn_num_layers=(1 3)
+#deepgcn_num_layers=(3)
 #sh cluster_rcnn.sh default "$@"
 #sh cluster_rcnn.sh pretrained "$@" --pretrained_rpn
 #sh cluster_rcnn.sh rotnet "$@"
@@ -21,6 +22,8 @@ deepgcn_num_layers=(1 3 5 10)
 for refine_num_layer in "${refine_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_refine edge_feats_$refine_num_layer "$@" --time 60:00:00 --gres gpu:v100 --set RCNN.REF_CONFIG.CONV edge --set RCNN.REF_CONFIG.USE_RCNN_FEATS True --set RCNN.REF_CONFIG.N_BLOCKS $refine_num_layer; done
 #for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepgcn edge_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer --set RCNN.DEEPGCN_CONFIG.CONV edge; done
 #for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepgcn $deepgcn_num_layer "$@" --time 50:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer; done
+#for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepfeats edge_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer --set RCNN.DEEPGCN_CONFIG.CONV edge; done
+#for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepfeats edge_modilation_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer --set RCNN.DEEPGCN_CONFIG.CONV edge --set RCNN.REF_CONFIG.LINEAR_DILATION False; done
 #for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepfeats $deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer; done
 #sh cluster_rcnn.sh pretrained_offline default $@ --pretrained_rpn --time 20:00:00
 #sh cluster_rcnn.sh pretrained_offline_refine "$@" --pretrained_rpn --time 50:00:00
