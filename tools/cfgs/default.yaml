@@ -119,6 +119,7 @@ RCNN:
         CONSTANT_DILATION: False
         LINEAR_DILATION: True
         BLOCK: res
+        HEAD: True
 
     ROT_CONFIG:
         DEGREE_RES: 5
