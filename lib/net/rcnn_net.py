@@ -101,7 +101,7 @@ class DenseOpts():
         self.n_blocks = cfg.RCNN.DEEPGCN_CONFIG.N_BLOCKS
         self.in_channels = 3
         self.block = cfg.RCNN.DEEPGCN_CONFIG.BLOCK
-        self.head = True
+        self.head = cfg.RCNN.DEEPGCN_CONFIG.HEAD
         self.constant_dilation = cfg.RCNN.DEEPGCN_CONFIG.CONSTANT_DILATION
         self.linear_dilation = cfg.RCNN.DEEPGCN_CONFIG.LINEAR_DILATION
 

@@ -503,8 +503,6 @@ def eval_one_epoch_joint(model, dataloader, epoch_id, result_dir, logger):
 
         rcnn_cls = ret_dict['rcnn_cls'].view(batch_size, -1, ret_dict['rcnn_cls'].shape[1])
         rcnn_reg = ret_dict['rcnn_reg'].view(batch_size, -1, ret_dict['rcnn_reg'].shape[1])  # (B, M, C)
-        for key, val in data.items():
-            print(key, val.shape)
 
         # bounding box regression
         anchor_size = MEAN_SIZE
