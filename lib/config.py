@@ -32,6 +32,9 @@ __C.CLS_MEAN_SIZE = np.array([[1.52, 1.63, 3.88]], dtype=np.float32)
 
 __C.BATCH_SIZE = 4
 
+__C.CGCN = edict()
+__C.CGCN.ENABLED = False
+
 # 1. config of rpn network
 __C.RPN = edict()
 __C.RPN.ENABLED = True

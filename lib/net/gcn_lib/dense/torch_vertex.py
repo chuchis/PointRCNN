@@ -89,14 +89,18 @@ class ResBlock2d(nn.Module):
     """
     Residual Dynamic graph convolution block
     """
-    def __init__(self, in_channels, conv='edge', act='relu',
-                 norm=None, bias=True, res_scale=1):
+    def __init__(self, in_channels, kernel_size=9, dilation=1, conv='edge', act='relu',
+                 norm=None, bias=True, stochastic=False, epsilon=0.0, knn='matrix', res_scale=1):
         super(ResBlock2d, self).__init__()
         self.body = GraphConv2d(in_channels, in_channels, conv, act, norm, bias)
         self.res_scale = res_scale
+        if knn == 'matrix':
+            self.dilated_knn_graph = DenseDilatedKnnGraph(kernel_size, dilation, stochastic, epsilon)
+        else:
+            self.dilated_knn_graph = DilatedKnnGraph(kernel_size, dilation, stochastic, epsilon)
 
-    def forward(self, x, edge_idx):
-        return self.body(x, edge_idx) + x*self.res_scale
+    def forward(self, x, edge_input):
+        return self.body(x, self.dilated_knn_graph(edge_input)) + x*self.res_scale
 
 
 class DenseDynBlock2d(nn.Module):
