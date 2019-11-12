@@ -1325,12 +1325,12 @@ class RefineRCNNNet(nn.Module):
         # print(l_features[-1].shape)
         if self.training:
             num_proposals = cfg.RCNN.ROI_PER_IMAGE
-            proposals = target_dict['roi_boxes3d']
         else:
             num_proposals = cfg.TEST.RPN_POST_NMS_TOP_N
-            proposals = input_data['roi_boxes3d']
+
         if cfg.RCNN.REF_CONFIG.USE_PROPOSALS:
-            prop_norm = proposals
+            proposals = input_data['roi_boxes3d'].view(-1,7)
+            prop_norm = torch.zeros_like(proposals)
             prop_norm[:,0] = proposals[:,0]/80 + 0.5
             prop_norm[:,1] = proposals[:,1]/10 + 0.5
             prop_norm[:,2] = proposals[:,2]/70
