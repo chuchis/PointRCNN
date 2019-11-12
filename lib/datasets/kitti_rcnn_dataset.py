@@ -135,6 +135,7 @@ class KittiRCNNDataset(KittiDataset):
 
     @staticmethod
     def get_rpn_features(rpn_feature_dir, idx):
+        #print(rpn_feature_dir)
         rpn_feature_file = os.path.join(rpn_feature_dir, '%06d.npy' % idx)
         rpn_xyz_file = os.path.join(rpn_feature_dir, '%06d_xyz.npy' % idx)
         rpn_intensity_file = os.path.join(rpn_feature_dir, '%06d_intensity.npy' % idx)
@@ -238,7 +239,7 @@ class KittiRCNNDataset(KittiDataset):
                     return self.get_rcnn_training_sample_batch(index)
             else:
                 return self.get_proposal_from_file(index)
-                # return self.get_rcnn_training_sample_batch(index)
+                #return self.get_rcnn_training_sample_batch(index)
         else:
             raise NotImplementedError
 
