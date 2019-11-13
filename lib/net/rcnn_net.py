@@ -1553,14 +1553,16 @@ class RefineDeepRCNNNet(nn.Module):
             prop_feat[:,5] = proposals[:,5]/5
             prop_feat[:,6] = proposals[:,6]/(2*np.pi) + 0.5
             # print(features.shape, prop_feat.shape)
-            ref_features_prep = torch.cat((ref_features_prep, prop_feat.transpose(0,1).contiguous().unsqueeze(0).unsqueeze(-1)), dim=1)
+            prop_feat = prop_feat.view(features.shape[0], features.shape[2], 7).contiguous()
+            ref_features_prep = torch.cat((ref_features_prep, prop_feat.transpose(1,2).contiguous().unsqueeze(-1)), dim=1)
 
         if cfg.RCNN.REF_CONFIG.USE_RPN_FEATS:
             rpn_feats = pts_input[..., self.rcnn_input_channel:].transpose(1, 2).unsqueeze(dim=3)
-            # print(rpn_feats.shape)
-            rpn_feats = torch.max(rpn_feats, dim=2)[0].transpose(0,1).contiguous().unsqueeze(0)
-            # print(features.shape, rpn_feats.shape)
-            ref_features_prep = torch.cat((ref_features_prep, rpn_feats), dim=1)
+            #print(rpn_feats.shape)
+            rpn_feats = torch.max(rpn_feats, dim=2)[0]
+            rpn_feats = rpn_feats.view(features.shape[0], features.shape[2], -1).contiguous()
+            #print(features.shape, rpn_feats.shape)
+            ref_features_prep = torch.cat((ref_features_prep, rpn_feats.transpose(1,2).contiguous().unsqueeze(-1)), dim=1)
 
         # print(features.shape)
         # print(xyz.shape)
@@ -1773,15 +1775,16 @@ class DenseFeatRefineRCNN(nn.Module):
             prop_feat[:,4] = proposals[:,4]/10
             prop_feat[:,5] = proposals[:,5]/5
             prop_feat[:,6] = proposals[:,6]/(2*np.pi) + 0.5
-            #print(ref_features_prep.shape, prop_feat.shape)
-            ref_features_prep = torch.cat((ref_features_prep, prop_feat.transpose(0,1).contiguous().unsqueeze(0).unsqueeze(-1)), dim=1)
+            prop_feat = prop_feat.view(features.shape[0], features.shape[2], 7).contiguous()
+            ref_features_prep = torch.cat((ref_features_prep, prop_feat.transpose(1,2).contiguous().unsqueeze(-1)), dim=1)
 
         if cfg.RCNN.REF_CONFIG.USE_RPN_FEATS:
             rpn_feats = pts_input[..., self.rcnn_input_channel:].transpose(1, 2).unsqueeze(dim=3)
-            # print(rpn_feats.shape)
-            rpn_feats = torch.max(rpn_feats, dim=2)[0].transpose(0,1).contiguous().unsqueeze(0)
-            #print(ref_features_prep.shape, rpn_feats.shape)
-            ref_features_prep = torch.cat((ref_features_prep, rpn_feats), dim=1)
+            #print(rpn_feats.shape)
+            rpn_feats = torch.max(rpn_feats, dim=2)[0]
+            rpn_feats = rpn_feats.view(features.shape[0], features.shape[2], -1).contiguous()
+            #print(features.shape, rpn_feats.shape)
+            ref_features_prep = torch.cat((ref_features_prep, rpn_feats.transpose(1,2).contiguous().unsqueeze(-1)), dim=1)
 
         # print(features.shape)
         # print(xyz.shape)
