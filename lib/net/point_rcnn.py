@@ -46,6 +46,7 @@ class PointRCNN(nn.Module):
                 raise NotImplementedError
         if cfg.CGCN.ENABLED:
             self.cgcn_net = None
+        print(sum(p.numel() for p in self.rcnn_net.parameters()))
 
     def forward(self, input_data):
         if cfg.RPN.ENABLED:
