@@ -1,11 +1,12 @@
 #/bin/bash
 refine_num_layers=(1 3 5 10 20 30 40)
 #refine_num_layers=(1 3 5 10)
-#refine_num_layers=(1)
+refine_num_layers=(1)
 #deepgcn_num_layers=(1 3 5 10 20 30 40)
 deepgcn_num_layers=(1 3 5 10)
-#deepgcn_num_layers=(1 3)
-#deepgcn_num_layers=(3)
+#deepgcn_num_layers=(1 3 5)
+#deepgcn_num_layers=(5 10)
+#deepgcn_num_layers=(10)
 #sh cluster_rcnn.sh default "$@"
 #sh cluster_rcnn.sh pretrained "$@" --pretrained_rpn
 #sh cluster_rcnn.sh rotnet "$@"
@@ -19,12 +20,20 @@ deepgcn_num_layers=(1 3 5 10)
 #for refine_num_layer in "${refine_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_refine edge_$refine_num_layer "$@" --time 60:00:00 --gres gpu:v100 --set RCNN.REF_CONFIG.N_BLOCKS $refine_num_layer --set RCNN.REF_CONFIG.CONV edge; done
 #for refine_num_layer in "${refine_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_refine $refine_num_layer "$@" --time 60:00:00 --gres gpu:v100 --set RCNN.REF_CONFIG.N_BLOCKS $refine_num_layer; done
 #for refine_num_layer in "${refine_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_refine feats_$refine_num_layer "$@" --time 60:00:00 --gres gpu:v100 --set RCNN.REF_CONFIG.USE_RCNN_FEATS True --set RCNN.REF_CONFIG.N_BLOCKS $refine_num_layer; done
-for refine_num_layer in "${refine_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_refine edge_feats_$refine_num_layer "$@" --time 60:00:00 --gres gpu:v100 --set RCNN.REF_CONFIG.CONV edge --set RCNN.REF_CONFIG.USE_RCNN_FEATS True --set RCNN.REF_CONFIG.N_BLOCKS $refine_num_layer; done
+#for refine_num_layer in "${refine_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_refine edge_feats_$refine_num_layer "$@" --time 60:00:00 --gres gpu:v100 --set RCNN.REF_CONFIG.CONV edge --set RCNN.REF_CONFIG.USE_RCNN_FEATS True --set RCNN.REF_CONFIG.N_BLOCKS $refine_num_layer; done
+#for refine_num_layer in "${refine_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_refine edge_feats_modilation_$refine_num_layer "$@" --time 60:00:00 --gres gpu:v100 --set RCNN.REF_CONFIG.CONV edge --set RCNN.REF_CONFIG.USE_RCNN_FEATS True --set RCNN.REF_CONFIG.N_BLOCKS $refine_num_layer --set RCNN.REF_CONFIG.LINEAR_DILATION False; done
 #for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepgcn edge_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer --set RCNN.DEEPGCN_CONFIG.CONV edge; done
 #for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepgcn $deepgcn_num_layer "$@" --time 50:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer; done
+#for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepgcn fixed_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.BLOCK res_fixed --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer; done
+#for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepgcn edge_fixed_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.BLOCK res_fixed --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer --set RCNN.DEEPGCN_CONFIG.CONV edge; done
+#for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepfeats nohead_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer --set RCNN.DEEPGCN_CONFIG.HEAD False; done
 #for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepfeats edge_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer --set RCNN.DEEPGCN_CONFIG.CONV edge; done
-#for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepfeats edge_modilation_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer --set RCNN.DEEPGCN_CONFIG.CONV edge --set RCNN.REF_CONFIG.LINEAR_DILATION False; done
+#for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepfeats edge_modilation_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer --set RCNN.DEEPGCN_CONFIG.CONV edge --set RCNN.DEEPGCN_CONFIG.LINEAR_DILATION False; done
 #for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepfeats $deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer; done
+#sh cluster_rcnn.sh pretrained_offline_deepfeatsrefine edge_feats_modilation_5_edge_3 "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS 5 --set RCNN.DEEPGCN_CONFIG.CONV edge --set RCNN.DEEPGCN_CONFIG.LINEAR_DILATION False --set RCNN.REF_CONFIG.N_BLOCKS 3 --set RCNN.REF_CONFIG.CONV edge
+#learning_rate=(0.001 0.0005 0.0001)
+#for LR in "${learning_rate[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepfeatsrefine edge_feats_modilation_5_edge_3_$LR "$@" --time 50:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS 5 --set RCNN.DEEPGCN_CONFIG.CONV edge --set RCNN.DEEPGCN_CONFIG.LINEAR_DILATION False --set RCNN.REF_CONFIG.N_BLOCKS 3 --set RCNN.REF_CONFIG.CONV edge --set TRAIN.LR $LR; done
+#for repeats in {1..1}; do sh cluster_rcnn.sh pretrained_offline_deepfeatsrefine edge_feats_modilation_5_edge_3_$repeats "$@" --time 50:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS 5 --set RCNN.DEEPGCN_CONFIG.CONV edge --set RCNN.DEEPGCN_CONFIG.LINEAR_DILATION False --set RCNN.REF_CONFIG.N_BLOCKS 3 --set RCNN.REF_CONFIG.CONV edge; done
 #sh cluster_rcnn.sh pretrained_offline default $@ --pretrained_rpn --time 20:00:00
 #sh cluster_rcnn.sh pretrained_offline_refine "$@" --pretrained_rpn --time 50:00:00
 #sh cluster_rcnn.sh pretrained_offline_deeprefine "20_20" "$@" --pretrained_rpn --gres gpu:v100 --time 50:00:00
@@ -38,3 +47,33 @@ for refine_num_layer in "${refine_num_layers[@]}"; do sh cluster_rcnn.sh pretrai
 #for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_deepgcn $deepgcn_num_layer "$@" --pretrained_rpn --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer; done
 #for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_deepgcn constant_dilation_${deepgcn_num_layer} "$@" --pretrained_rpn --time 20:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.CONSTANT_DILATION True --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer; done
 #for deepgcn_num_layer in "${deepgcn_num_layers[@]}"; do sh cluster_rcnn.sh pretrained_offline_deepgcn ${deepgcn_num_layer}_constant_dilation "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.CONSTANT_DILATION True --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer; done
+
+#####################################################################################
+#  FINAL EXPERIMENTS
+#####################################################################################
+###########
+# DEFAULT on V100 for time
+#sh cluster_rcnn.sh pretrained_offline default $@ --pretrained_rpn --time 20:00:00 --gres gpu:v100
+
+#####################################################################################
+# RGCN + CGCN
+#for repeats in {1..5}; do sh cluster_rcnn.sh pretrained_offline_deepfeatsrefine edge_feats_modilation_5_edge_3_$repeats "$@" --time 50:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS 5 --set RCNN.DEEPGCN_CONFIG.CONV edge --set RCNN.DEEPGCN_CONFIG.LINEAR_DILATION False --set RCNN.REF_CONFIG.N_BLOCKS 3 --set RCNN.REF_CONFIG.CONV edge; done
+#sh cluster_rcnn.sh pretrained_offline_deepfeatsrefine edge_feats_modilation_5_edge_3 "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS 5 --set RCNN.DEEPGCN_CONFIG.CONV edge --set RCNN.DEEPGCN_CONFIG.LINEAR_DILATION False --set RCNN.REF_CONFIG.N_BLOCKS 3 --set RCNN.REF_CONFIG.CONV edge
+#for repeats in {1..5}; do sh cluster_rcnn.sh pretrained_offline_deepfeatsrefine feats_modilation_5_3_$repeats "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS 5 --set RCNN.DEEPGCN_CONFIG.LINEAR_DILATION False --set RCNN.REF_CONFIG.N_BLOCKS 3; done
+sh cluster_rcnn.sh pretrained_offline_deepfeatsrefine feats_modilation_5_3 "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS 5 --set RCNN.DEEPGCN_CONFIG.LINEAR_DILATION False --set RCNN.REF_CONFIG.N_BLOCKS 3
+
+#####################################################################################
+# RGCN
+#for deepgcn_num_layer in {5..5}; do sh cluster_rcnn.sh pretrained_offline_deepfeats nodil_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer --set RCNN.DEEPGCN_CONFIG.CONSTANT_DILATION True; done
+#for deepgcn_num_layer in {5..5}; do sh cluster_rcnn.sh pretrained_offline_deepfeats edge_modilation_$deepgcn_num_layer "$@" --time 200:00:00 --gres gpu:v100 --set RCNN.DEEPGCN_CONFIG.N_BLOCKS $deepgcn_num_layer --set RCNN.DEEPGCN_CONFIG.CONV edge --set RCNN.DEEPGCN_CONFIG.LINEAR_DILATION False; done
+
+#####################################################################################
+# CGCN
+# EDGE PROP
+#for refine_num_layer in {3..3}; do sh cluster_rcnn.sh pretrained_offline_refine edge_prop_$refine_num_layer "$@" --time 60:00:00 --gres gpu:v100 --set RCNN.REF_CONFIG.CONV edge --set RCNN.REF_CONFIG.USE_PROPOSALS True --set RCNN.REF_CONFIG.N_BLOCKS $refine_num_layer; done
+# EDGE 4-DIL RPN
+#for refine_num_layer in {3..3}; do sh cluster_rcnn.sh pretrained_offline_refine edge_rpn_feats_modilation_$refine_num_layer "$@" --time 60:00:00 --gres gpu:v100 --set RCNN.REF_CONFIG.USE_RPN_FEATS True --set RCNN.REF_CONFIG.CONV edge --set RCNN.REF_CONFIG.CONSTANT_DILATION False --set RCNN.REF_CONFIG.N_BLOCKS $refine_num_layer; done
+# EDGE 4-DIL
+#for refine_num_layer in {3..3}; do sh cluster_rcnn.sh pretrained_offline_refine edge_modilation_$refine_num_layer "$@" --time 60:00:00 --gres gpu:v100 --set RCNN.REF_CONFIG.CONV edge --set RCNN.REF_CONFIG.CONSTANT_DILATION False --set RCNN.REF_CONFIG.N_BLOCKS $refine_num_layer; done
+# EDGE RPN
+#for refine_num_layer in {3..3}; do sh cluster_rcnn.sh pretrained_offline_refine edge_rpn_feats_$refine_num_layer "$@" --time 60:00:00 --gres gpu:v100 --set RCNN.REF_CONFIG.CONV edge --set RCNN.REF_CONFIG.USE_RPN_FEATS True --set RCNN.REF_CONFIG.N_BLOCKS $refine_num_layer; done
