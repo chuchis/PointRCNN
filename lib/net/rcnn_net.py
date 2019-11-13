@@ -39,7 +39,7 @@ class DenseDeepGCN(torch.nn.Module):
             if opt.linear_dilation:
                 self.dilation = lambda x: x+1
             else:
-                self.dilation = lambda x: x%5+1
+                self.dilation = lambda x: (x%4)+1
         if opt.block.lower() == 'res':
             self.backbone = Seq(*[ResDynBlock2d(channels, k, self.dilation(i), conv, act, norm, bias, stochastic, epsilon)
                                   for i in range(self.n_blocks-1)])
@@ -1341,6 +1341,8 @@ class RefineRCNNNet(nn.Module):
             prop_norm[:,6] = proposals[:,6]/(2*np.pi) + 0.5
             l_features[-1] = torch.cat((l_features[-1], proposals.unsqueeze(2)), dim=1)
 
+
+
         if cfg.BATCH_SIZE == 1:
             features = l_features[-1].view(1,-1,l_features[-1].shape[1],1).contiguous().transpose(1,2).contiguous()
         else:
@@ -1710,8 +1712,17 @@ class DenseFeatRefineRCNN(nn.Module):
         else:
             num_proposals = cfg.TEST.RPN_POST_NMS_TOP_N
 
-        ref_features_prep = features.view(cfg.BATCH_SIZE,num_proposals,features.shape[1],1).contiguous().transpose(1,2).contiguous()
-        ref_features = self.refine(ref_features_prep).transpose(1,2).contiguous().view(cfg.BATCH_SIZE*num_proposals,-1,1).contiguous()
+
+        if cfg.BATCH_SIZE == 1:
+            ref_features_prep = features.view(1,-1,features.shape[1],1).contiguous().transpose(1,2).contiguous()
+        else:
+            ref_features_prep = features.view(-1,num_proposals,features.shape[1],1).contiguous().transpose(1,2).contiguous()
+        #print(features.shape)
+        # print(xyz.shape)
+        ref_features = self.refine(ref_features_prep).transpose(1,2).contiguous().view(-1,self.refine.channel_out,1).contiguous()
+
+        #ref_features_prep = features.view(cfg.BATCH_SIZE,num_proposals,features.shape[1],1).contiguous().transpose(1,2).contiguous()
+        #ref_features = self.refine(ref_features_prep).transpose(1,2).contiguous().view(cfg.BATCH_SIZE*num_proposals,-1,1).contiguous()
 
         rcnn_cls = self.cls_layer(ref_features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
         rcnn_reg = self.reg_layer(ref_features).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
