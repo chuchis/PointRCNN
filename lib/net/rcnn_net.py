@@ -1153,7 +1153,7 @@ class RefineRCNNNet(nn.Module):
         opt.conv = cfg.RCNN.REF_CONFIG.CONV
         opt.constant_dilation=cfg.RCNN.REF_CONFIG.CONSTANT_DILATION
         opt.linear_dilation=cfg.RCNN.REF_CONFIG.LINEAR_DILATION
-        self.backbone = DenseDeepGCN(opt)
+        self.refine = DenseDeepGCN(opt)
         if cfg.RCNN.USE_RPN_FEATURES:
             self.rcnn_input_channel = 3 + int(cfg.RCNN.USE_INTENSITY) + int(cfg.RCNN.USE_MASK) + int(cfg.RCNN.USE_DEPTH)
             self.xyz_up_layer = pt_utils.SharedMLP([self.rcnn_input_channel] + cfg.RCNN.XYZ_UP_LAYER,
@@ -1180,7 +1180,7 @@ class RefineRCNNNet(nn.Module):
         # classification layer
         cls_channel = 1 if num_classes == 2 else num_classes
         cls_layers = []
-        channel_in = self.backbone.channel_out
+        channel_in = self.refine.channel_out
         if cfg.RCNN.REF_CONFIG.USE_RCNN_FEATS:
             channel_in += opt.in_channels
 
@@ -1358,8 +1358,8 @@ class RefineRCNNNet(nn.Module):
             features = torch.cat((features, rpn_feats), dim=1)
         # print(features.shape)
         # print(xyz.shape)
-
-        features = self.backbone(features).transpose(1,2).contiguous().view(-1,self.refine.channel_out,1).contiguous()
+        
+        features = self.refine(features).transpose(1,2).contiguous().view(-1,self.refine.channel_out,1).contiguous()
         # print(features.shape)
         # if cfg.RCNN.REF_CONFIG.USE_RCNN_FEATS:
         #     #print(features.shape, l_features[-1].shape)
