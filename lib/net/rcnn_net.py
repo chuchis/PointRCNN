@@ -12,7 +12,7 @@ import numpy as np
 
 import lib.utils.kitti_utils as kitti_utils
 import lib.utils.roipool3d.roipool3d_utils as roipool3d_utils
-from gcn_lib.dense import BasicConv, GraphConv2d, ResDynBlock2d, DenseDynBlock2d, DenseDilatedKnnGraph, ResBlock2d
+from gcn_lib.dense import BasicConv, GraphConv2d, ResDynBlock2d, DenseDynBlock2d, DenseDilatedKnnGraph, ResBlock2d, DynConv2d
 from torch.nn import Sequential as Seq
 
 
@@ -49,6 +49,9 @@ class DenseDeepGCN(torch.nn.Module):
                                   for i in range(self.n_blocks-1)])
         elif opt.block.lower() == 'res_fixed':
             self.backbone = Seq(*[ResBlock2d(channels, k, self.dilation(i), conv, act, norm, bias, stochastic, epsilon)
+                                  for i in range(self.n_blocks-1)])
+        elif opt.block.lower() == 'no_res':
+            self.backbone = Seq(*[DynConv2d(channels, channels, k, self.dilation(i), conv, act, norm, bias, stochastic, epsilon)
                                   for i in range(self.n_blocks-1)])
         else:
             raise NotImplementedError('{} is not implemented. Please check.\n'.format(opt.block))
