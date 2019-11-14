@@ -68,6 +68,7 @@ RPN:
 # 2. config of rcnn network
 RCNN:
     ENABLED: True
+    LOAD_RCNN_ONLY: False
 
     # config of input
     ROI_SAMPLE_JIT: True

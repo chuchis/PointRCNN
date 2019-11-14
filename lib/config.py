@@ -31,6 +31,7 @@ __C.PC_AREA_SCOPE = np.array([[-40, 40],
 __C.CLS_MEAN_SIZE = np.array([[1.52, 1.63, 3.88]], dtype=np.float32)
 
 __C.BATCH_SIZE = 4
+__C.LOAD_OPTIMIZER = True
 
 __C.CGCN = edict()
 __C.CGCN.ENABLED = False
@@ -84,6 +85,7 @@ __C.RPN.SCORE_THRESH = 0.3
 # 2. config of rcnn network
 __C.RCNN = edict()
 __C.RCNN.ENABLED = False
+__C.RCNN.LOAD_RCNN_ONLY = False
 
 # config of input
 __C.RCNN.USE_RPN_FEATURES = True
