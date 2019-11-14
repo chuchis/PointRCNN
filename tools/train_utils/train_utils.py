@@ -88,11 +88,16 @@ def load_checkpoint(model=None, optimizer=None, filename='checkpoint', logger=cu
                 print("Loading RPN only")
                 update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rpn" in key}
             else:
-                update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict()}
+                if cfg.RCNN.LOAD_RCNN_ONLY:
+                    update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rcnn" in key}
+                    print([key for key, val in model_state.items() if key in model.state_dict() and "rcnn" in key])
+                else:
+                    update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict()}
+
             state_dict = model.state_dict()
             state_dict.update(update_model_state)
             model.load_state_dict(state_dict)
-        if optimizer is not None and checkpoint['optimizer_state'] is not None:
+        if optimizer is not None and checkpoint['optimizer_state'] is not None and cfg.LOAD_OPTIMIZER:
             optimizer.load_state_dict(checkpoint['optimizer_state'])
         logger.info("==> Done")
     else:
@@ -112,8 +117,13 @@ def load_part_ckpt(model, filename, logger=cur_logger, total_keys=-1):
             print("Loading RPN only")
             update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rpn" in key}
         else:
-            update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict()}
-        #[print(key) for key, val in model_state.items() if key in model.state_dict()]
+            if cfg.RCNN.LOAD_RCNN_ONLY:
+                update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rcnn" in key}
+                print([key for key, val in model_state.items() if key in model.state_dict() and "rcnn" in key])
+            else:
+                update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict()}
+
+
         state_dict = model.state_dict()
         state_dict.update(update_model_state)
         model.load_state_dict(state_dict)
