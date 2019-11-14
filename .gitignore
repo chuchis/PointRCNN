@@ -9,4 +9,6 @@
 *.png
 **/*.egg-info
 **/dist
+*.err
+*.out
 tools/gt_database/
