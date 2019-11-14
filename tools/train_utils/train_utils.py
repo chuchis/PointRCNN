@@ -89,7 +89,7 @@ def load_checkpoint(model=None, optimizer=None, filename='checkpoint', logger=cu
                 update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rpn" in key}
             else:
                 if cfg.RCNN.LOAD_RCNN_ONLY:
-                    update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rcnn" in key}
+                    update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rcnn" in key and "cls_layer" not in key and "reg_layer" not in key}
                     print([key for key, val in model_state.items() if key in model.state_dict() and "rcnn" in key])
                 else:
                     update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict()}
@@ -118,7 +118,7 @@ def load_part_ckpt(model, filename, logger=cur_logger, total_keys=-1):
             update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rpn" in key}
         else:
             if cfg.RCNN.LOAD_RCNN_ONLY:
-                update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rcnn" in key}
+                update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict() and "rcnn" in key and "cls_layer" not in key and "reg_layer" not in key}
                 print([key for key, val in model_state.items() if key in model.state_dict() and "rcnn" in key])
             else:
                 update_model_state = {key: val for key, val in model_state.items() if key in model.state_dict()}
